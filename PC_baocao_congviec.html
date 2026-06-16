@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Báo cáo công việc — P&C</title>
+<style>
+  :root{
+    --navy:#0C2A47;--navy2:#103A5E;--ocean:#1768B0;--ocean2:#2E86DE;--sky:#5BA8E6;
+    --bg:#EEF3F8;--card:#FFFFFF;--ink:#0E1B2A;--ink2:#46586B;--ink3:#8295A8;--line:#DCE5EE;
+    --red:#D24A43;--red-s:#FBE9E8;--amber:#B97A0C;--amber-s:#FAF0D8;--green:#2E8B57;--green-s:#E5F2E9;
+    --font:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:14px;line-height:1.5}
+  .wrap{max-width:1280px;margin:0 auto;padding:0 22px}
+  .top{background:linear-gradient(110deg,var(--navy),var(--navy2) 60%,var(--ocean));color:#fff}
+  .top .wrap{display:flex;align-items:center;gap:14px;padding:16px 22px;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:12px}
+  .logo{width:38px;height:38px;border-radius:9px;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px}
+  .brand h1{font-size:17px;font-weight:600;margin:0;line-height:1.15}.brand .sub{font-size:11.5px;color:#AFC8E0}
+  .srcchip{font-size:11.5px;font-weight:600;padding:4px 11px;border-radius:20px;background:rgba(255,255,255,.15);color:#CFE0F0}
+  .srcchip.live{background:rgba(46,139,87,.92);color:#fff}
+  .tabs{margin-left:auto;display:flex;gap:4px;background:rgba(255,255,255,.1);border-radius:10px;padding:4px}
+  .tabs button{border:0;background:transparent;color:#CFE0F0;font-family:var(--font);font-weight:600;font-size:13px;padding:8px 16px;border-radius:7px;cursor:pointer}
+  .tabs button.on{background:#fff;color:var(--navy)}
+  .filt{background:#fff;border-bottom:1px solid var(--line)}
+  .filt .wrap{display:flex;gap:14px;align-items:center;flex-wrap:wrap;padding:11px 22px}
+  .filt label{font-size:12px;color:var(--ink3);font-weight:600}
+  .sel{border:1px solid var(--line);border-radius:9px;padding:8px 12px;font-family:var(--font);font-size:13.5px;color:var(--ink);background:#fff}
+  main{padding:24px 0 70px}
+  .page{display:none}.page.on{display:block}
+  .row{display:grid;gap:16px}.r-kpi{grid-template-columns:repeat(4,1fr)}
+  h2{font-size:16px;font-weight:600;margin:30px 0 12px;display:flex;align-items:center;gap:9px}
+  h2 .ic{width:5px;height:18px;border-radius:3px;background:var(--ocean)}h2:first-child{margin-top:0}
+  h2 .c{font-size:12px;font-weight:600;color:var(--ink3);background:#fff;border:1px solid var(--line);border-radius:20px;padding:1px 10px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:18px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:16px 18px;position:relative;overflow:hidden}
+  .kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--ocean)}
+  .kpi.r::before{background:var(--red)}.kpi.a::before{background:var(--amber)}.kpi.g::before{background:var(--green)}
+  .kpi .lab{font-size:12px;color:var(--ink3);font-weight:500}
+  .kpi .val{font-size:29px;font-weight:700;letter-spacing:-.02em;margin-top:4px;line-height:1;font-variant-numeric:tabular-nums}
+  .kpi .meta{font-size:11.5px;color:var(--ink2);margin-top:6px}
+  .kpi.r .val{color:var(--red)}.kpi.a .val{color:var(--amber)}.kpi.g .val{color:var(--green)}
+  .av{width:26px;height:26px;border-radius:50%;background:var(--ocean);color:#fff;font-size:10px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;flex:none;vertical-align:middle;margin-right:6px}
+  .chip{display:inline-block;font-size:11px;font-weight:600;padding:2px 9px;border-radius:20px;white-space:nowrap}
+  .chip.red{background:var(--red-s);color:var(--red)}.chip.amber{background:var(--amber-s);color:var(--amber)}
+  .chip.green{background:var(--green-s);color:var(--green)}.chip.gray{background:#EDF2F7;color:var(--ink2)}.chip.ocean{background:#E5F0FB;color:var(--ocean)}
+  .chip.svc{background:#EEF1F6;color:#52617A}
+  .blink{display:inline-block;font-size:11px;font-weight:600;color:var(--ocean);background:#E5F0FB;padding:4px 10px;border-radius:7px;text-decoration:none;white-space:nowrap}
+  .blink:hover{background:#D4E6F8}
+  .late{font-size:11.5px;color:var(--red);font-weight:700;font-variant-numeric:tabular-nums}
+  .muted{color:var(--ink3);font-size:13px;padding:14px 2px}
+  .sv{font-size:11px;color:var(--ink3)}
+  .meb{color:var(--ocean);font-weight:700;font-size:11px}
+  .pcode{font-weight:700}.dname{font-weight:700}.pdesc{color:var(--ink2);font-size:12px;font-weight:400}
+
+  .deptbar{display:grid;grid-template-columns:170px 1fr 130px;gap:12px;align-items:center;padding:9px 0;border-bottom:1px solid #EDF2F7}
+  .deptbar:last-child{border-bottom:0}
+  .deptbar .dn{font-weight:600;font-size:13px}.deptbar .dn small{display:block;font-weight:400;color:var(--ink3);font-size:11px}
+  .deptbar .bar{height:22px;background:#EDF2F7;border-radius:6px;position:relative;overflow:hidden}
+  .deptbar .bar i{position:absolute;left:0;top:0;bottom:0;border-radius:6px}
+  .deptbar .bar span{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:11px;font-weight:700}
+  .deptbar .rt{text-align:right;font-size:12px;color:var(--ink2)}
+
+  /* tree table */
+  .treewrap{background:#fff;border:1px solid var(--line);border-radius:13px;overflow:hidden}
+  table.tree{border-collapse:collapse;width:100%;font-size:12.5px}
+  table.tree th{text-align:left;font-size:10.5px;color:var(--ink3);text-transform:uppercase;letter-spacing:.03em;padding:9px 12px;border-bottom:1px solid var(--line);font-weight:600}
+  table.tree td{padding:8px 12px;border-bottom:1px solid #F1F5F9;vertical-align:middle}
+  table.tree tbody tr:hover{background:#F8FBFE}
+  table.tree tr.lvl0{background:#F4F8FC}
+  table.tree tr.lvl0:hover{background:#EEF4FA}
+  table.tree tr.mine td{background:#EFF6FE}
+  table.tree .nm{display:flex;align-items:center;gap:7px}
+  table.tree tr.lvl1 .nm{padding-left:22px}
+  table.tree tr.lvl2 .nm{padding-left:46px}
+  table.tree tr.lvl1 td:first-child{font-weight:500}
+  table.tree .caret{width:13px;color:var(--ink3);font-size:10px;cursor:pointer;flex:none;text-align:center;user-select:none}
+  table.tree .sub{color:var(--ink3);font-size:11px}
+
+  .pgwrap{background:#fff;border:1px solid var(--line);border-radius:13px;padding:6px;overflow-x:auto}
+  table.pg{border-collapse:collapse;width:100%;font-size:12.5px;min-width:1120px}
+  table.pg th{padding:8px;border-bottom:2px solid var(--line);color:var(--ink2);font-size:11.5px;font-weight:600;text-align:center}
+  table.pg th.l{text-align:left}
+  table.pg td{padding:7px 8px;border-bottom:1px solid #EFF3F8;white-space:nowrap}
+  table.pg .cust small{display:block;color:var(--ink3);font-size:11px}
+  table.pg td.val{text-align:right;font-variant-numeric:tabular-nums}
+  table.pg td.day{padding:0;min-width:34px;border-left:1px solid #F1F5F9}
+  table.pg td.today,table.pg th.today{border-right:2px dashed #9DB0C2}
+  table.pg .blk{height:18px;margin:1px 0}
+  table.pg .blk.past{background:#BBD6F0}.blk.fut{background:#103A5E}.blk.over{background:#D24A43}
+  table.pg .blk.s{border-top-left-radius:5px;border-bottom-left-radius:5px}.blk.e{border-top-right-radius:5px;border-bottom-right-radius:5px}
+  table.pg td.due{box-shadow:inset -2px 0 0 #0E1B2A}
+  .leg{display:flex;gap:16px;align-items:center;padding:8px 10px 4px;font-size:11px;color:var(--ink2);flex-wrap:wrap}
+  .leg i{width:16px;height:10px;border-radius:2px;display:inline-block;margin-right:5px;vertical-align:middle}
+
+  .emphd{display:flex;align-items:center;gap:14px;background:linear-gradient(100deg,var(--navy),var(--ocean));color:#fff;border-radius:13px;padding:16px 20px;margin-top:8px}
+  .emphd .av{width:50px;height:50px;font-size:18px;background:rgba(255,255,255,.18)}
+  .emphd .nm{font-size:19px;font-weight:600}.emphd .rl{font-size:12.5px;color:#CFE0F0;margin-top:2px}
+  .sumbar{background:#fff;border:1px solid var(--line);border-radius:12px;padding:13px 18px;margin-top:16px;display:flex;gap:22px;flex-wrap:wrap;align-items:center;font-size:13px;color:var(--ink2)}
+  .sumbar .seg{display:flex;align-items:center;gap:7px}.sumbar .n{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}
+  .stack{display:flex;flex-direction:column;gap:9px}
+  .tk{display:flex;gap:13px;align-items:flex-start;padding:12px 14px;border:1px solid var(--line);border-left-width:4px;border-radius:11px;background:#fff}
+  .tk.over{border-left-color:var(--red);background:#FEF6F5}.tk.soon{border-left-color:var(--amber);background:#FDFAF1}.tk.open{border-left-color:var(--ocean)}.tk.pend{border-left-color:#C7D4E0}
+  .tk .mn{flex:1;min-width:0}.tk .l1{font-weight:600;font-size:13.5px}
+  .tk .l2{font-size:12.5px;color:var(--ink2);margin-top:3px}.tk .l2 b{color:var(--ink);font-weight:600}
+  .tk .l3{font-size:11.5px;color:var(--ink3);margin-top:3px}
+  .tk .rt{text-align:right;white-space:nowrap;display:flex;flex-direction:column;align-items:flex-end;gap:5px}
+  .dl{font-size:12.5px;font-weight:700;color:var(--ink);background:#F1F5F9;border-radius:6px;padding:3px 8px;font-variant-numeric:tabular-nums}
+  .dl.over{color:#fff;background:var(--red)}.dl.soon{color:#fff;background:var(--amber)}
+  details.sec>summary{list-style:none;cursor:pointer;font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;margin:18px 0 11px}
+  details.sec>summary::-webkit-details-marker{display:none}
+  details.sec>summary .ic{width:5px;height:16px;border-radius:3px;background:var(--ocean)}
+  details.sec .chev{margin-left:auto;color:var(--ink3);transition:transform .15s}details.sec[open] .chev{transform:rotate(90deg)}
+  footer{color:var(--ink3);font-size:12px;padding:22px 0;border-top:1px solid var(--line)}
+  @media(max-width:900px){.r-kpi{grid-template-columns:repeat(2,1fr)}.deptbar{grid-template-columns:120px 1fr 90px}}
+</style>
+</head>
+<body>
+
+<div class="top"><div class="wrap">
+  <div class="brand"><div class="logo">P&amp;C</div>
+    <div><h1>Báo cáo công việc</h1><div class="sub">Giải Pháp Doanh Nghiệp P&amp;C · Base.vn Service</div></div></div>
+  <span class="srcchip" id="srcChip">● Đang tải…</span>
+  <div class="tabs">
+    <button id="tabCeo" class="on" onclick="showPage('ceo')">Trang điều hành (CEO)</button>
+    <button id="tabEmp" onclick="showPage('emp')">Trang nhân viên</button>
+  </div>
+</div></div>
+
+<div class="filt"><div class="wrap" id="filtBar"></div></div>
+
+<main class="wrap">
+  <section id="pageCeo" class="page on">
+    <h2><span class="ic"></span>Tình hình chung</h2>
+    <div class="row r-kpi" id="kpiCeo"></div>
+    <h2><span class="ic"></span>So sánh phòng ban — phòng nào đang chậm tiến độ</h2>
+    <div class="card" id="deptCompare"></div>
+    <h2><span class="ic"></span>Ai đang nợ task — cần giục ai <span class="c" id="cntChase"></span></h2>
+    <div class="treewrap"><div id="chase"></div></div>
+    <h2><span class="ic"></span>Timeline dự án — có kịp hạn giao khách không</h2>
+    <div class="pgwrap"><div class="leg">
+      <span><i style="background:#BBD6F0"></i>Đã qua</span><span><i style="background:#103A5E"></i>Kế hoạch</span>
+      <span><i style="background:#D24A43"></i>Trễ hạn giao</span><span>┊ hôm nay · ▕ hạn khách</span>
+    </div><div id="timelineWrap"></div></div>
+  </section>
+
+  <section id="pageEmp" class="page">
+    <div id="empResult"></div>
+  </section>
+</main>
+
+<footer class="wrap">Nguồn: Google Apps Script (Base.vn Service) · "Trễ" = quá Thời hạn của bước · Mỗi dự án đi qua tập quy trình riêng theo loại đơn.</footer>
+
+<script>
+const SOURCE_URL="https://script.google.com/a/macros/base.vn/s/AKfycbzZmRxyAgb4xJoYA_bxQktJuIp9-U6pxhhSdvFGchqtmdYGz6ZrfgtM24SljRvxvIo9Ew/exec";
+const BASE_TICKET="https://service.base.vn/services/tickets/";
+const HOUR=36e5,DAY=24*HOUR;
+const DEPTS=["Mua Hàng","Kĩ thuật","Khối Sản Xuất","Bộ phận giao hàng","Hành chánh - Quản trị","HARDWARE R&D"];
+const DCOLOR={"Mua Hàng":"#1768B0","Kĩ thuật":"#0EA5B5","Khối Sản Xuất":"#3F6FB0","Bộ phận giao hàng":"#C8830E","Hành chánh - Quản trị":"#6A5AB0","HARDWARE R&D":"#15807A"};
+const LIFE=[
+ {label:"Báo giá",block:"Lập báo giá theo BOM",dept:"Hành chánh - Quản trị",sla:24,svc:"1. QT RFQ"},
+ {label:"Thiết kế/R&D",block:"Review BOM/Gerber & thiết kế",dept:"HARDWARE R&D",sla:48,svc:"QT Thiết kế R&D"},
+ {label:"Mua hàng",block:"Check giá NCC & tạo PO",dept:"Mua Hàng",sla:16,svc:"2. QT Mua hàng dự án"},
+ {label:"NCC xác nhận",block:"NCC xác nhận PO + gửi PI/CI",dept:"Mua Hàng",sla:16,svc:"3. QT Xử lý PO"},
+ {label:"Nhập kho",block:"Theo dõi PO về & nhập kho",dept:"Khối Sản Xuất",sla:40,svc:"4. QT Theo dõi PO về"},
+ {label:"Sản xuất",block:"SMT + lắp ráp",dept:"Khối Sản Xuất",sla:24,svc:"7. QT Sản xuất"},
+ {label:"QC/Kiểm tra",block:"Testing & QC",dept:"Kĩ thuật",sla:12,svc:"7. QT Sản xuất"},
+ {label:"Giao hàng",block:"Đóng gói & giao khách",dept:"Bộ phận giao hàng",sla:8,svc:"QT Tài xế giao nhận"},
+ {label:"Thanh toán",block:"Thu công nợ sau giao",dept:"Hành chánh - Quản trị",sla:24,svc:"6. QT Thanh toán"}
+];
+const TYPES={"Gia công SX":[0,1,2,3,4,5,6,7,8],"Dự án tuỳ biến":[0,1,2,3,4,5,6,7,8],"Thương mại (trading)":[0,2,3,4,7,8],"Đặt SX lại":[2,3,4,5,6,7,8]};
+const TKEYS=Object.keys(TYPES);
+const EMP=[
+ {id:"NV001",name:"Huỳnh Thị Hằng",dept:"Mua Hàng"},{id:"NV002",name:"Trần Văn Bình",dept:"Mua Hàng"},
+ {id:"NV003",name:"Nguyễn Văn An",dept:"Kĩ thuật"},{id:"NV004",name:"Lê Hoàng Cường",dept:"Kĩ thuật"},
+ {id:"NV005",name:"Trần Văn Thắng",dept:"Khối Sản Xuất"},{id:"NV006",name:"Phạm Minh Dũng",dept:"Khối Sản Xuất"},
+ {id:"NV007",name:"Đỗ Quang Phúc",dept:"Bộ phận giao hàng"},{id:"NV008",name:"Vũ Minh Đức",dept:"Bộ phận giao hàng"},
+ {id:"NV009",name:"Phan Thị Phi",dept:"Hành chánh - Quản trị"},{id:"NV010",name:"Phạm Thu Dung",dept:"Hành chánh - Quản trị"},
+ {id:"NV011",name:"Nguyễn Mạnh Hùng",dept:"HARDWARE R&D"},{id:"NV012",name:"Đặng Quốc Khánh",dept:"HARDWARE R&D"}
+];
+const byDept={};EMP.forEach(e=>(byDept[e.dept]=byDept[e.dept]||[]).push(e));
+const CUST=["Robotech VN","FPT Telecom","VinSmart","Viettel R&D","BKAV Electronics","MediaTek SG","Sao Bắc Đẩu","Rạng Đông","Elcom","Gtel Mobile"];
+const PROD=["Board điều khiển BLDC","Mạch sạc Li-ion 4S","Module IoT NB-IoT","Bo nguồn 48V/20A","Mạch đo dòng Hall","Gateway LoRa","Bo cảm biến áp suất","Mạch khuếch đại RF","Bo điều khiển HVAC","Module GPS/GNSS"];
+let _s=20260616;const rnd=()=>{_s=(_s*1103515245+12345)&0x7fffffff;return _s/0x7fffffff;};
+const oFor=(dept,salt)=>byDept[dept][salt%byDept[dept].length].name;
+function DEMO(){
+  const now=Date.now(),rows=[];const NPROJ=20;
+  for(let pi=0;pi<NPROJ;pi++){
+    const cust=CUST[pi%CUST.length],prod=PROD[pi%PROD.length],code="DA-"+(2401+pi),value=(8+Math.floor(rnd()*60))*1000;
+    const type=TKEYS[pi%TKEYS.length],list=TYPES[type],curK=Math.floor(rnd()*list.length),urg=["over","over","soon","ok","ok"][pi%5],custDue=now+(-5+rnd()*22)*DAY;
+    list.forEach((si,k)=>{const st=LIFE[si],owner=oFor(st.dept,pi+k);let status,deadline=null,entered=null,updated=null;
+      if(k<curK){status="Hoàn thành";const base=now-(curK-k)*4*DAY-(2+rnd()*4)*DAY;deadline=new Date(base);entered=new Date(base-st.sla*HOUR);updated=new Date(base-(rnd()<.75?rnd()*st.sla*HOUR:-(1+rnd()*3)*DAY));}
+      else if(k===curK){status="Đang xử lý";let dl;if(urg==="over")dl=now-(1+rnd()*5)*DAY;else if(urg==="soon")dl=now+(2+rnd()*16)*HOUR;else dl=now+(2+rnd()*6)*DAY;deadline=new Date(dl);entered=new Date(dl-st.sla*HOUR);}
+      else{status="Chờ tới lượt";const after=list.slice(k+1).reduce((a,j)=>a+LIFE[j].sla,0);deadline=new Date(custDue-after*HOUR);}
+      const tid=192000+pi*9+si,sid=586700+si;
+      rows.push({id:"SV-"+tid,baseId:tid,stageId:sid,link:BASE_TICKET+tid+"?stage_id="+sid,svc:st.svc,block:st.block,dept:st.dept,owner,deadline,entered,updated,status,project:code,projType:type,customer:cust,prod,value,custDue:new Date(custDue),stageIdx:si});});
+  }
+  return rows;
+}
+const C={id:"ID",proc:"Dịch vụ",owner:"Người thực hiện",created:"Tạo lúc",updated:"Cập nhật lần cuối lúc",block:"Tên khối",blockEntered:"Tạo khối lúc",deadline:"Thời gian nhắc hạn",status:"Trạng thái",customer:"Tên khách hàng",project:"Dự án",total:"Tổng",dept:"Phòng ban",custDue:"Ngày khách yêu cầu giao hàng",prod:"Sản phẩm",stageId:"ID khối của phiếu"};
+function toDate(v){if(!v)return null;const d=new Date(v);return isNaN(d)?null:d;}
+function stageOf(block,proc){const b=(block||"")+" "+(proc||"");
+  if(/báo giá|RFQ/i.test(b))return 0;if(/thiết kế|gerber|R&D/i.test(b))return 1;
+  if(/check giá|tạo PO|mua hàng dự án/i.test(b))return 2;if(/NCC xác nhận|PI\/CI|xử lý PO/i.test(b))return 3;
+  if(/kho nhận|nhập kho|theo dõi PO/i.test(b))return 4;if(/SMT|lắp ráp|sản xuất/i.test(b))return 5;
+  if(/testing|QC|kiểm tra/i.test(b))return 6;if(/giao hàng|tài xế|đóng gói/i.test(b))return 7;
+  if(/thanh toán|công nợ/i.test(b))return 8;return 2;}
+function mapLive(arr){return arr.map(r=>{const block=r[C.block]||"",proc=r[C.proc]||"";const si=stageOf(block,proc);
+  const id=r[C.id]||"",sid=r[C.stageId]||"";const link=id?BASE_TICKET+id+(sid?"?stage_id="+sid:""):"";
+  return {id:"SV-"+id,baseId:id,stageId:sid,link,svc:proc||(LIFE[si]&&LIFE[si].svc)||"",block,dept:r[C.dept]||(LIFE[si]&&LIFE[si].dept)||"",
+    owner:(r[C.owner]||"(chưa giao)").toString().trim(),deadline:toDate(r[C.deadline]),entered:toDate(r[C.blockEntered]||r[C.created]),updated:toDate(r[C.updated]),
+    status:(r[C.status]||"").toString().trim(),project:r[C.project]||r[C.customer]||"(không rõ)",projType:"",customer:r[C.customer]||"",prod:r[C.prod]||"",
+    value:+(String(r[C.total]||"").replace(/[^\d.]/g,""))||0,custDue:toDate(r[C.custDue]),stageIdx:si};});}
+
+const usd=v=>v?"$"+v.toLocaleString("en-US"):"—";
+const dd=d=>d?d.toLocaleDateString("vi-VN",{day:"2-digit",month:"2-digit"}):"—";
+const dt=d=>d?dd(d)+" "+d.toLocaleTimeString("vi-VN",{hour:"2-digit",minute:"2-digit"}):"—";
+const ini=n=>{const p=String(n).trim().split(/\s+/);return((p[0]||"")[0]||"")+((p[p.length-1]||"")[0]||"");};
+const avc=n=>["#1768B0","#0EA5B5","#3F6FB0","#2E86DE","#15807A","#6A5AB0"][[...String(n)].reduce((a,c)=>a+c.charCodeAt(0),0)%6];
+const kpi=(l,v,c,m)=>`<div class="kpi ${c||''}"><div class="lab">${l}</div><div class="val">${v}</div><div class="meta">${m||''}</div></div>`;
+const lbl=t=>LIFE[t.stageIdx]?LIFE[t.stageIdx].label:t.block;
+const blink=t=>t.link?`<a class="blink" href="${t.link}" target="_blank" rel="noopener">Mở Base ↗</a>`:"";
+function cls(t){const now=Date.now();if(t.status==="Đã hủy")return"cancel";if(t.status==="Chờ tới lượt")return"pending";
+  if(t.status==="Hoàn thành")return(t.deadline&&t.updated)?(t.updated<=t.deadline?"done_ontime":"done_late"):"done_ontime";
+  if(t.deadline){const d=+t.deadline;if(now>d)return"overdue";if(d-now<=DAY)return"due_soon";}return"open";}
+const isUrgent=t=>["overdue","due_soon"].includes(cls(t));
+const lateD=t=>t.deadline?Math.max(0,(Date.now()-t.deadline)/DAY):0;
+const heldD=t=>t.entered?(Date.now()-t.entered)/DAY:0;
+function statusChip(c){const m={overdue:["red","Quá hạn"],due_soon:["amber","Sắp đến hạn"],open:["ocean","Đang làm"],pending:["gray","Chờ tới lượt"],done_ontime:["green","Xong đúng hạn"],done_late:["amber","Xong trễ"]};const[cl,tx]=m[c]||["gray",c];return `<span class="chip ${cl}">${tx}</span>`;}
+function dlChip(t){const c=cls(t);if(c==="overdue")return `<span class="dl over">Hạn ${dt(t.deadline)}</span>`;if(c==="due_soon")return `<span class="dl soon">Hạn ${dt(t.deadline)}</span>`;if(c==="open")return `<span class="dl">Hạn ${dt(t.deadline)}</span>`;return "";}
+function projectStages(code){const ts=DATA.filter(t=>t.project===code).sort((a,b)=>a.stageIdx-b.stageIdx);
+  return ts.map(t=>{const c=cls(t);const state=(c==="done_ontime"||c==="done_late")?"done":(c==="pending")?"todo":"cur";return {t,stageIdx:t.stageIdx,state};});}
+function projInfo(code){const ts=DATA.filter(t=>t.project===code);const meta=ts[0];const stg=projectStages(code);const cur=stg.findIndex(s=>s.state==="cur");
+  const remainH=cur<0?0:stg.slice(cur).reduce((a,s)=>a+(LIFE[s.stageIdx]?LIFE[s.stageIdx].sla:8),0);const projFinish=cur<0?null:new Date(Date.now()+remainH*HOUR);
+  let custDue=meta.custDue;if(!custDue){const ds=ts.map(t=>+t.deadline).filter(Boolean);custDue=ds.length?new Date(Math.max(...ds)):new Date(Date.now()+7*DAY);}
+  let verdict,vcls;if(cur<0){verdict="Đã giao";vcls="green";}else{const slackD=(custDue-projFinish)/DAY;if(Date.now()>+custDue){verdict="Trễ giao "+((Date.now()-custDue)/DAY).toFixed(0)+"đ";vcls="red";}else if(slackD>=2){verdict="Kịp";vcls="green";}else if(slackD>=0){verdict="Nguy cơ";vcls="amber";}else{verdict="Trễ "+(-slackD).toFixed(0)+"đ";vcls="red";}}
+  const value=ts.reduce((a,t)=>Math.max(a,t.value),0);
+  return {ts,meta,stg,cur,projFinish,custDue,verdict,vcls,value,type:meta.projType};}
+let DATA=[];
+
+/* ===== filter ===== */
+let F={dept:"all",emp:"all",time:"all"};
+function passTime(t,time){const n=Date.now();if(time==="all")return true;if(time==="overdue")return cls(t)==="overdue";
+  if(!t.deadline)return false;const win=time==="7d"?7:time==="30d"?30:9999;return +t.deadline<=n+win*DAY;}
+function timeOpts(sel){return [["all","Tất cả thời gian"],["overdue","Chỉ quá hạn"],["7d","Trong 7 ngày"],["30d","Trong 30 ngày"]].map(([v,t])=>`<option value="${v}" ${v===sel?"selected":""}>${t}</option>`).join("");}
+function deptOpts(sel){return [`<option value="all" ${sel==="all"?"selected":""}>Tất cả phòng ban</option>`].concat(DEPTS.map(d=>`<option ${d===sel?"selected":""}>${d}</option>`)).join("");}
+function renderFilter(page){
+  const bar=document.getElementById("filtBar");
+  if(page==="ceo"){
+    bar.innerHTML=`<label>Phòng ban</label><select class="sel" id="fDept" onchange="onDeptCeo()">${deptOpts(F.dept)}</select>
+      <label>Nhân viên</label><select class="sel" id="fEmpCeo" onchange="onFilter()">${ceoEmpOpts(F.dept,F.emp)}</select>
+      <label>Thời gian</label><select class="sel" id="fTime" onchange="onFilter()">${timeOpts(F.time)}</select>`;
+  }else{
+    bar.innerHTML=`<label>Phòng ban</label><select class="sel" id="fDept" onchange="onFilterEmp(true)">${DEPTS.map(d=>`<option ${d===empDept?"selected":""}>${d}</option>`).join("")}</select>
+      <label>Nhân viên</label><select class="sel" id="fEmp" onchange="onFilterEmp(false)"></select>
+      <label>Thời gian</label><select class="sel" id="fTime" onchange="renderEmp()">${timeOpts(F.time)}</select>`;
+    fillEmpSel();
+  }
+}
+function ceoEmpOpts(dept,sel){const list=dept==="all"?EMP:(byDept[dept]||[]);return `<option value="all" ${sel==="all"?"selected":""}>Tất cả nhân viên</option>`+list.map(e=>`<option value="${e.name}" ${e.name===sel?"selected":""}>${e.name}</option>`).join("");}
+function onDeptCeo(){F.dept=document.getElementById("fDept").value;F.emp="all";renderFilter("ceo");renderCeo();}
+function onFilter(){F.dept=document.getElementById("fDept").value;F.emp=(document.getElementById("fEmpCeo")||{}).value||"all";F.time=document.getElementById("fTime").value;renderCeo();}
+function curPage(){return document.getElementById("pageCeo").classList.contains("on")?"ceo":"emp";}
+
+/* ===== tree table ===== */
+function treeTable(headers,rows){
+  const head=`<tr>${headers.map((h,i)=>`<th>${h}</th>`).join("")}</tr>`;
+  const body=rows.map(r=>{const caret=r.expandable?`<span class="caret" onclick="treeTog('${r.key}')">▸</span>`:`<span class="caret"></span>`;
+    const cells=r.cells.map((c,i)=>i===0?`<td><div class="nm">${caret}<span>${c}</span></div></td>`:`<td>${c}</td>`).join("");
+    return `<tr class="lvl${r.level} ${r.cls||''}" data-key="${r.key}" data-parent="${r.parent||''}" ${r.level>0?'style="display:none"':''}>${cells}</tr>`;}).join("");
+  return `<table class="tree"><thead>${head}</thead><tbody>${body}</tbody></table>`;
+}
+function treeTog(key){const kids=[...document.querySelectorAll('tr[data-parent="'+key+'"]')];if(!kids.length)return;
+  const showing=kids[0].style.display!=="none";const caret=document.querySelector('tr[data-key="'+key+'"] .caret');
+  if(showing){const st=[key];while(st.length){const k=st.pop();document.querySelectorAll('tr[data-parent="'+k+'"]').forEach(r=>{r.style.display="none";const c=r.querySelector('.caret');if(c&&c.textContent==="▾")c.textContent="▸";st.push(r.dataset.key);});}if(caret)caret.textContent="▸";}
+  else{kids.forEach(r=>r.style.display="");if(caret)caret.textContent="▾";}}
+
+/* ===== CEO ===== */
+function deptStats(){return DEPTS.map(d=>{const ts=DATA.filter(t=>t.dept===d);const open=ts.filter(t=>["overdue","due_soon","open"].includes(cls(t))).length;
+  const ov=ts.filter(t=>cls(t)==="overdue");const dn=ts.filter(t=>["done_ontime","done_late"].includes(cls(t)));const ot=ts.filter(t=>cls(t)==="done_ontime").length;
+  const rate=dn.length?Math.round(ot/dn.length*100):100;return {d,open,od:ov.length,al:ov.length?ov.reduce((a,t)=>a+lateD(t),0)/ov.length:0,rate,ovRatio:open?ov.length/open:0};});}
+function renderCeo(){
+  const open=DATA.filter(t=>["overdue","due_soon","open"].includes(cls(t)));const od=DATA.filter(t=>cls(t)==="overdue");const soon=DATA.filter(t=>cls(t)==="due_soon");
+  const dn=DATA.filter(t=>["done_ontime","done_late"].includes(cls(t)));const ot=DATA.filter(t=>cls(t)==="done_ontime").length;const rate=dn.length?Math.round(ot/dn.length*100):0;
+  const codesAll=[...new Set(DATA.map(t=>t.project))];const totalVal=codesAll.reduce((a,c)=>a+projInfo(c).value,0);
+  document.getElementById("kpiCeo").innerHTML=
+    kpi("Task đang mở",open.length,"",od.length+" quá hạn · "+soon.length+" sắp tới")+
+    kpi("Đang quá hạn",od.length,"r",od.length?("trễ TB "+(od.reduce((a,t)=>a+lateD(t),0)/od.length).toFixed(1)+" ngày"):"")+
+    kpi("Tỷ lệ đúng hạn",rate+"%","g",dn.length+" task đã xong")+
+    kpi("Tổng giá trị dự án",usd(totalVal),"",codesAll.length+" dự án đang chạy");
+  const ds=deptStats().sort((a,b)=>b.ovRatio-a.ovRatio||b.od-a.od);
+  document.getElementById("deptCompare").innerHTML=ds.map(s=>{const pctOv=Math.round(s.ovRatio*100);
+    return `<div class="deptbar"><div class="dn">${s.d}<small>${s.open} task mở · đúng hạn ${s.rate}%</small></div>
+    <div class="bar"><i style="width:${Math.max(pctOv,3)}%;background:${pctOv>=40?'var(--red)':pctOv>=20?'var(--amber)':'var(--green)'}"></i><span style="color:${pctOv>=20?'#fff':'var(--ink2)'}">${s.od} quá hạn (${pctOv}%)</span></div>
+    <div class="rt">trễ TB ${s.al?s.al.toFixed(1)+'đ':'—'}</div></div>`;}).join("");
+  renderChase();renderTimeline();
+}
+function renderChase(){
+  let id=0;const rows=[];const openList=[];let totalPeople=0;
+  const depList=F.dept==="all"?DEPTS:[F.dept];
+  depList.forEach(dep=>{
+    const peeps=(byDept[dep]||[]).filter(e=>F.emp==="all"||e.name===F.emp).map(e=>{const ts=DATA.filter(t=>t.owner===e.name);
+      const at=ts.filter(t=>isUrgent(t)&&passTime(t,F.time)).sort((a,b)=>lateD(b)-lateD(a)||(+a.deadline)-(+b.deadline));
+      return {e,at,od:at.filter(t=>cls(t)==="overdue").length};}).filter(p=>p.at.length);
+    if(!peeps.length)return;
+    totalPeople+=peeps.length;
+    const depKey="d"+(id++);const depOd=peeps.reduce((a,p)=>a+p.od,0);
+    rows.push({key:depKey,parent:"",level:0,expandable:true,cells:[`<span class="dname">${dep}</span> <span class="chip ${depOd?'red':'gray'}">${depOd} quá hạn</span> <span class="chip gray">${peeps.length} người</span>`,"","","","","",""]});
+    openList.push(depKey);
+    peeps.forEach(p=>{const pKey="p"+(id++);const soon=p.at.length-p.od;
+      rows.push({key:pKey,parent:depKey,level:1,expandable:true,cells:[`${p.e.name} ${p.od?`<span class="chip red">${p.od} quá hạn</span>`:""} ${soon?`<span class="chip amber">${soon} sắp tới</span>`:""}`,"","","","","",""]});
+      if(p.od)openList.push(pKey);
+      p.at.forEach(t=>{const c=cls(t);
+        rows.push({key:"t"+(id++),parent:pKey,level:2,expandable:false,cells:[`<span class="sv">${t.id}</span>`,`<span class="chip svc">${t.svc}</span>`,`<b>${t.project}</b>`,t.customer,`${lbl(t)}<div class="sub">${t.block}</div>`,dt(t.deadline),c==="overdue"?`<span class="late">trễ ${lateD(t).toFixed(1)}đ</span>`:`<span class="chip amber">sắp tới</span>`,blink(t)]});});
+    });
+  });
+  document.getElementById("cntChase").textContent=totalPeople+" người cần giục";
+  const headers=["Phòng ban / Nhân sự / Việc","Quy trình","Dự án","Khách hàng","Bước đang giữ","Hạn","Tình trạng",""];
+  document.getElementById("chase").innerHTML=rows.length?treeTable(headers,rows):`<div class="muted" style="padding:18px">Không có ai đang nợ task trong bộ lọc hiện tại.</div>`;
+  openList.forEach(k=>treeTog(k));
+}
+/* ===== Timeline ===== */
+const NTL=18, TODX=4;
+const AX=(()=>{const b=new Date();b.setHours(0,0,0,0);b.setDate(b.getDate()-TODX);return b;})();
+const TLDAYS=[...Array(NTL)].map((_,i)=>{const d=new Date(AX);d.setDate(d.getDate()+i);return d;});
+const dayIdx=d=>{if(!d)return -1e9;const x=new Date(d);x.setHours(0,0,0,0);return Math.round((x-AX)/DAY);};
+const clampI=i=>Math.max(0,Math.min(NTL-1,i));
+function renderTimeline(){
+  let codes=[...new Set(DATA.map(t=>t.project))];
+  if(F.dept!=="all")codes=codes.filter(c=>DATA.some(t=>t.project===c&&t.dept===F.dept));
+  if(F.emp!=="all")codes=codes.filter(c=>DATA.some(t=>t.project===c&&t.owner===F.emp));
+  if(F.time!=="all")codes=codes.filter(c=>DATA.some(t=>t.project===c&&passTime(t,F.time)));
+  const list=codes.map(projInfo).sort((a,b)=>({red:0,amber:1,green:2}[a.vcls]-{red:0,amber:1,green:2}[b.vcls])||(+a.custDue)-(+b.custDue));
+  const head=`<tr><th class="l">Dự án</th><th class="l">Khách / Sản phẩm</th><th>Loại đơn</th><th>Giá trị</th><th class="l">Giai đoạn</th>
+    ${TLDAYS.map((d,i)=>`<th class="day ${i===TODX?'today':''}">${d.toLocaleDateString("vi-VN",{day:"2-digit"})}</th>`).join("")}<th>Đánh giá</th></tr>`;
+  const body=list.map(p=>{
+    const sRaw=Math.min(...p.ts.map(t=>dayIdx(t.entered||t.deadline)));const eRaw=Math.max(dayIdx(p.custDue),p.projFinish?dayIdx(p.projFinish):dayIdx(p.custDue));
+    const sI=clampI(isFinite(sRaw)?sRaw:0),eI=clampI(eRaw),dueI=clampI(dayIdx(p.custDue));
+    let cells="";for(let d=0;d<NTL;d++){const tdy=d===TODX?" today":"";const due=d===dueI?" due":"";
+      if(d<sI||d>eI){cells+=`<td class="day${tdy}${due}"></td>`;continue;}
+      const kind=d<=TODX?"past":(d<=dueI?"fut":"over");const s=d===sI?" s":"";const e=d===eI?" e":"";cells+=`<td class="day${tdy}${due}"><div class="blk ${kind}${s}${e}"></div></td>`;}
+    return `<tr><td class="pcode">${p.meta.project}</td><td class="cust">${p.meta.customer}<small>${p.meta.prod||""}</small></td>
+      <td><span class="chip gray">${p.type||"—"}</span></td><td class="val">${usd(p.value)}</td>
+      <td>${p.cur>=0?`<span class="chip ocean">${lbl(p.stg[p.cur].t)}</span>`:`<span class="chip green">Đã giao</span>`}</td>${cells}<td><span class="chip ${p.vcls}">${p.verdict}</span></td></tr>`;
+  }).join("");
+  document.getElementById("timelineWrap").innerHTML=list.length?`<table class="pg"><thead>${head}</thead><tbody>${body}</tbody></table>`:`<div class="muted" style="padding:14px">Không có dự án nào khớp bộ lọc.</div>`;
+}
+
+/* ===== Employee ===== */
+let empDept=DEPTS[0], empId="";
+function fillEmpSel(){const es=byDept[empDept]||[];const sel=document.getElementById("fEmp");
+  sel.innerHTML=es.map(e=>`<option value="${e.id}">${e.name} (${e.id})</option>`).join("");
+  if(!es.find(e=>e.id===empId))empId=es[0]?es[0].id:"";sel.value=empId;}
+function onFilterEmp(deptChanged){if(deptChanged){empDept=document.getElementById("fDept").value;fillEmpSel();}empId=document.getElementById("fEmp").value;renderEmp();}
+function taskRow(t){const c=cls(t);const cl=c==="overdue"?"over":c==="due_soon"?"soon":c==="pending"?"pend":"open";
+  if(c==="pending"){const stg=projectStages(t.project);const cur=stg.findIndex(s=>s.state==="cur");const myK=stg.findIndex(s=>s.t===t);const left=cur>=0?myK-cur:0;
+    return `<div class="tk pend"><div class="mn"><div class="l1"><span class="sv">${t.id}</span> ${t.project} · ${t.customer}${t.prod?' — '+t.prod:''}</div>
+      <div class="l2"><span class="chip svc">${t.svc}</span> <b>${lbl(t)}</b> · ${t.block}</div>
+      <div class="l3">dự án đang ở "${cur>=0?lbl(stg[cur].t):'?'}" · còn ${left>0?left:0} bước · cần xong trước ${dd(t.deadline)}</div></div>
+      <div class="rt"><span class="dl">Cần xong ${dd(t.deadline)}</span><span class="chip gray">Chờ tới lượt</span>${blink(t)}</div></div>`;}
+  const lt=c==="overdue"?`<span class="late">TRỄ ${lateD(t).toFixed(1)} ngày</span>`:"";
+  return `<div class="tk ${cl}"><div class="mn"><div class="l1"><span class="sv">${t.id}</span> ${t.project} · ${t.customer}${t.prod?' — '+t.prod:''}</div>
+    <div class="l2"><span class="chip svc">${t.svc}</span> <b>${lbl(t)}</b> · ${t.block}</div>
+    <div class="l3">vào bước ${dd(t.entered)} · đã giữ ${heldD(t).toFixed(1)}đ</div></div>
+    <div class="rt">${dlChip(t)}${statusChip(c)}${lt}${blink(t)}</div></div>`;
+}
+function tasksTable(list,mode){
+  if(!list.length)return `<div class="treewrap"><div class="muted" style="padding:16px">Không có.</div></div>`;
+  const lastH=mode==="overdue"?"Trễ":"Trạng thái";
+  const head=`<tr><th>Mã phiếu</th><th>Quy trình</th><th>Dự án / Khách</th><th>Bước</th><th>Hạn</th><th>${lastH}</th><th></th></tr>`;
+  const body=list.map(t=>{const c=cls(t);const last=mode==="overdue"?`<span class="late">trễ ${lateD(t).toFixed(1)}đ</span>`:statusChip(c);
+    return `<tr><td class="sv">${t.id}</td><td><span class="chip svc">${t.svc}</span></td><td><b>${t.project}</b><div class="sub">${t.customer}</div></td><td>${lbl(t)}<div class="sub">${t.block}</div></td><td>${dt(t.deadline)}</td><td>${last}</td><td>${blink(t)}</td></tr>`;}).join("");
+  return `<div class="treewrap"><table class="tree"><thead>${head}</thead><tbody>${body}</tbody></table></div>`;
+}
+function renderEmp(){
+  const time=(document.getElementById("fTime")||{}).value||"all";F.time=time;
+  const emp=EMP.find(e=>e.id===empId);const box=document.getElementById("empResult");
+  if(!emp){box.innerHTML=`<div class="muted">Chọn nhân viên.</div>`;return;}
+  const owner=emp.name;let mine=DATA.filter(t=>t.owner===owner);
+  const doing=mine.filter(t=>["overdue","due_soon","open"].includes(cls(t))&&passTime(t,time)).sort((a,b)=>(+a.deadline||9e15)-(+b.deadline||9e15));
+  const todo=mine.filter(t=>cls(t)==="pending"&&passTime(t,time));const urgent=mine.filter(isUrgent);
+  const overdue=doing.filter(t=>cls(t)==="overdue");
+  const active=doing.filter(t=>["open","due_soon"].includes(cls(t)));
+  const soon=doing.filter(t=>cls(t)==="due_soon").length;
+  const d2=mine.filter(t=>["done_ontime","done_late"].includes(cls(t)));const ot=mine.filter(t=>cls(t)==="done_ontime").length;const rate=d2.length?Math.round(ot/d2.length*100):100;
+  // projects: cây Dự án › Quy trình
+  const all=[...new Set(mine.map(t=>t.project))];
+  function pr(c){const mt=mine.filter(t=>t.project===c);const ac=mt.filter(t=>["overdue","due_soon","open"].includes(cls(t)));if(ac.some(t=>cls(t)==="overdue"))return 0;if(ac.length)return 1;const pd=mt.filter(t=>cls(t)==="pending");if(pd.length){const ms=Math.min(...pd.map(t=>t.stageIdx));const cur=projectStages(c).find(s=>s.state==="cur");if(cur&&cur.stageIdx>=ms-2)return 2;return 3;}return 4;}
+  let codes=all.map(c=>[c,pr(c)]).filter(x=>x[1]<=2).sort((a,b)=>a[1]-b[1]).map(x=>x[0]);
+  if(time!=="all")codes=codes.filter(c=>mine.some(t=>t.project===c&&passTime(t,time)));
+  let id=0;const rows=[];const openList=[];
+  codes.forEach(code=>{const info=projInfo(code);const meta=info.meta;const pKey="P"+(id++);
+    const hot=info.stg.some(s=>s.t.owner===owner&&cls(s.t)==="overdue");
+    rows.push({key:pKey,parent:"",level:0,expandable:true,cells:[`<span class="pcode">${code}</span> <span class="pdesc">${meta.customer}${meta.prod?' — '+meta.prod:''}</span> <span class="chip gray">${info.type||""}</span> <span class="chip ${info.vcls}">${info.verdict}</span> <span class="pdesc">💰 ${usd(info.value)} · giao ${dd(info.custDue)}</span>`,"","","",""]});
+    if(hot)openList.push(pKey);
+    info.stg.forEach(s=>{const t=s.t;const me=t.owner===owner;const c=cls(t);
+      rows.push({key:"q"+(id++),parent:pKey,level:1,expandable:false,cls:me?"mine":"",cells:[`<span class="chip svc">${t.svc}</span> ${lbl(t)}`,`${me?'<span class="meb">● </span>':''}${t.owner}`,dt(t.deadline),statusChip(c),blink(t)]});});
+  });
+  const projHeaders=["Dự án / Quy trình","Người xử lý","Hạn","Trạng thái",""];
+  const projTree=rows.length?treeTable(projHeaders,rows):`<div class="muted" style="padding:16px">Không có dự án nào khớp bộ lọc.</div>`;
+  box.innerHTML=`
+    <div class="emphd"><div><div class="nm">${owner}</div><div class="rl">${emp.id} · ${emp.dept}</div></div></div>
+    <div class="row r-kpi" style="margin-top:16px">
+      ${kpi("Quá hạn",overdue.length,overdue.length?"r":"g","cần xử lý ngay")}${kpi("Đang thực hiện",active.length,"","việc đang ở tay bạn")}${kpi("Sắp đến hạn",soon,soon?"a":"","trong 24h tới")}${kpi("Tỷ lệ đúng hạn",rate+"%",rate>=80?"g":rate>=60?"a":"r",d2.length+" task đã xong")}</div>
+    <h2 style="margin-top:26px"><span class="ic"></span>Quá hạn <span class="c">${overdue.length}</span></h2>
+    ${tasksTable(overdue,"overdue")}
+    <h2 style="margin-top:24px"><span class="ic"></span>Đang thực hiện <span class="c">${active.length}</span></h2>
+    ${tasksTable(active,"active")}
+    <h2 style="margin-top:30px"><span class="ic"></span>Dự án có tên bạn <span class="c">${codes.length}</span></h2>
+    <div class="treewrap">${projTree}</div>`;
+  openList.forEach(k=>treeTog(k));
+}
+function showPage(p){document.getElementById("pageCeo").classList.toggle("on",p==="ceo");document.getElementById("pageEmp").classList.toggle("on",p==="emp");
+  document.getElementById("tabCeo").classList.toggle("on",p==="ceo");document.getElementById("tabEmp").classList.toggle("on",p==="emp");
+  renderFilter(p);if(p==="ceo")renderCeo();else renderEmp();}
+function setSrc(live,msg){const c=document.getElementById("srcChip");c.classList.toggle("live",live);c.textContent=live?"● Dữ liệu trực tiếp":"● Dữ liệu demo"+(msg?" ("+msg+")":"");}
+async function loadData(){
+  try{const res=await fetch(SOURCE_URL,{redirect:"follow"});const txt=await res.text();let json;try{json=JSON.parse(txt);}catch(_){throw new Error("phản hồi không phải JSON");}
+    const arr=Array.isArray(json)?json:(json.data||json.rows||json.values||[]);if(!arr.length||typeof arr[0]!=="object")throw new Error("rỗng");
+    DATA=mapLive(arr);setSrc(true);
+  }catch(e){DATA=DEMO();setSrc(false,e.message);}
+  renderFilter("ceo");renderCeo();
+}
+loadData();
+</script>
+</body>
+</html>
