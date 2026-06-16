@@ -92,6 +92,10 @@
   table.pg .blk.past{background:#BBD6F0}.blk.fut{background:#103A5E}.blk.over{background:#D24A43}
   table.pg .blk.s{border-top-left-radius:5px;border-bottom-left-radius:5px}.blk.e{border-top-right-radius:5px;border-bottom-right-radius:5px}
   table.pg td.due{box-shadow:inset -2px 0 0 #0E1B2A}
+  #timelineWrap{max-height:430px;overflow:auto}
+  table.pg thead th{position:sticky;top:0;background:#fff;z-index:2}
+  .sbar{display:flex;height:9px;border-radius:5px;overflow:hidden;background:#EDF2F7;min-width:80px}
+  .sbar i{display:block;height:100%}.sbar .g{background:var(--green)}.sbar .a{background:var(--amber)}.sbar .r{background:var(--red)}.sbar .o{background:var(--sky)}
   .leg{display:flex;gap:16px;align-items:center;padding:8px 10px 4px;font-size:11px;color:var(--ink2);flex-wrap:wrap}
   .leg i{width:16px;height:10px;border-radius:2px;display:inline-block;margin-right:5px;vertical-align:middle}
 
@@ -136,8 +140,8 @@
     <h2><span class="ic"></span>Tình hình chung</h2>
     <div class="row r-kpi" id="kpiCeo"></div>
     <h2><span class="ic"></span>So sánh phòng ban — phòng nào đang chậm tiến độ</h2>
-    <div class="card" id="deptCompare"></div>
-    <h2><span class="ic"></span>Ai đang nợ task — cần giục ai <span class="c" id="cntChase"></span></h2>
+    <div id="deptCompare"></div>
+    <h2><span class="ic"></span>Các task đang chậm deadline <span class="c" id="cntChase"></span></h2>
     <div class="treewrap"><div id="chase"></div></div>
     <h2><span class="ic"></span>Timeline dự án — có kịp hạn giao khách không</h2>
     <div class="pgwrap"><div class="leg">
@@ -173,12 +177,12 @@ const LIFE=[
 const TYPES={"Gia công SX":[0,1,2,3,4,5,6,7,8],"Dự án tuỳ biến":[0,1,2,3,4,5,6,7,8],"Thương mại (trading)":[0,2,3,4,7,8],"Đặt SX lại":[2,3,4,5,6,7,8]};
 const TKEYS=Object.keys(TYPES);
 const EMP=[
- {id:"NV001",name:"Huỳnh Thị Hằng",dept:"Mua Hàng"},{id:"NV002",name:"Trần Văn Bình",dept:"Mua Hàng"},
- {id:"NV003",name:"Nguyễn Văn An",dept:"Kĩ thuật"},{id:"NV004",name:"Lê Hoàng Cường",dept:"Kĩ thuật"},
- {id:"NV005",name:"Trần Văn Thắng",dept:"Khối Sản Xuất"},{id:"NV006",name:"Phạm Minh Dũng",dept:"Khối Sản Xuất"},
- {id:"NV007",name:"Đỗ Quang Phúc",dept:"Bộ phận giao hàng"},{id:"NV008",name:"Vũ Minh Đức",dept:"Bộ phận giao hàng"},
- {id:"NV009",name:"Phan Thị Phi",dept:"Hành chánh - Quản trị"},{id:"NV010",name:"Phạm Thu Dung",dept:"Hành chánh - Quản trị"},
- {id:"NV011",name:"Nguyễn Mạnh Hùng",dept:"HARDWARE R&D"},{id:"NV012",name:"Đặng Quốc Khánh",dept:"HARDWARE R&D"}
+ {id:"PCID11111",name:"Huỳnh Thị Hằng",dept:"Mua Hàng"},{id:"PCID11112",name:"Trần Văn Bình",dept:"Mua Hàng"},
+ {id:"PCID11113",name:"Nguyễn Văn An",dept:"Kĩ thuật"},{id:"PCID11114",name:"Lê Hoàng Cường",dept:"Kĩ thuật"},
+ {id:"PCID11115",name:"Trần Văn Thắng",dept:"Khối Sản Xuất"},{id:"PCID11116",name:"Phạm Minh Dũng",dept:"Khối Sản Xuất"},
+ {id:"PCID11117",name:"Đỗ Quang Phúc",dept:"Bộ phận giao hàng"},{id:"PCID11118",name:"Vũ Minh Đức",dept:"Bộ phận giao hàng"},
+ {id:"PCID11119",name:"Phan Thị Phi",dept:"Hành chánh - Quản trị"},{id:"PCID11120",name:"Phạm Thu Dung",dept:"Hành chánh - Quản trị"},
+ {id:"PCID11121",name:"Nguyễn Mạnh Hùng",dept:"HARDWARE R&D"},{id:"PCID11122",name:"Đặng Quốc Khánh",dept:"HARDWARE R&D"}
 ];
 const byDept={};EMP.forEach(e=>(byDept[e.dept]=byDept[e.dept]||[]).push(e));
 const CUST=["Robotech VN","FPT Telecom","VinSmart","Viettel R&D","BKAV Electronics","MediaTek SG","Sao Bắc Đẩu","Rạng Đông","Elcom","Gtel Mobile"];
@@ -241,34 +245,34 @@ function projInfo(code){const ts=DATA.filter(t=>t.project===code);const meta=ts[
 let DATA=[];
 
 /* ===== filter ===== */
-let F={dept:"all",emp:"all",time:"all"};
-function passTime(t,time){const n=Date.now();if(time==="all")return true;if(time==="overdue")return cls(t)==="overdue";
-  if(!t.deadline)return false;const win=time==="7d"?7:time==="30d"?30:9999;return +t.deadline<=n+win*DAY;}
-function timeOpts(sel){return [["all","Tất cả thời gian"],["overdue","Chỉ quá hạn"],["7d","Trong 7 ngày"],["30d","Trong 30 ngày"]].map(([v,t])=>`<option value="${v}" ${v===sel?"selected":""}>${t}</option>`).join("");}
+let F={dept:"all",emp:"all",from:"",to:""};
+function passRange(t){if(!F.from&&!F.to)return true;if(!t.deadline)return false;const d=+t.deadline;
+  if(F.from&&d<+new Date(F.from))return false;if(F.to){const e=new Date(F.to);e.setHours(23,59,59,999);if(d>+e)return false;}return true;}
+function dateBar(){return `<label>Từ ngày</label><input type="date" class="sel" id="fFrom" value="${F.from}" onchange="onDate()">
+  <label>Đến ngày</label><input type="date" class="sel" id="fTo" value="${F.to}" onchange="onDate()">`;}
+function onDate(){F.from=(document.getElementById("fFrom")||{}).value||"";F.to=(document.getElementById("fTo")||{}).value||"";if(curPage()==="ceo")renderCeo();else renderEmp();}
 function deptOpts(sel){return [`<option value="all" ${sel==="all"?"selected":""}>Tất cả phòng ban</option>`].concat(DEPTS.map(d=>`<option ${d===sel?"selected":""}>${d}</option>`)).join("");}
 function renderFilter(page){
   const bar=document.getElementById("filtBar");
   if(page==="ceo"){
     bar.innerHTML=`<label>Phòng ban</label><select class="sel" id="fDept" onchange="onDeptCeo()">${deptOpts(F.dept)}</select>
       <label>Nhân viên</label><select class="sel" id="fEmpCeo" onchange="onFilter()">${ceoEmpOpts(F.dept,F.emp)}</select>
-      <label>Thời gian</label><select class="sel" id="fTime" onchange="onFilter()">${timeOpts(F.time)}</select>`;
+      ${dateBar()}`;
   }else{
-    bar.innerHTML=`<label>Phòng ban</label><select class="sel" id="fDept" onchange="onFilterEmp(true)">${DEPTS.map(d=>`<option ${d===empDept?"selected":""}>${d}</option>`).join("")}</select>
-      <label>Nhân viên</label><select class="sel" id="fEmp" onchange="onFilterEmp(false)"></select>
-      <label>Thời gian</label><select class="sel" id="fTime" onchange="renderEmp()">${timeOpts(F.time)}</select>`;
-    fillEmpSel();
+    bar.innerHTML=`<label>Mã nhân viên</label><input class="sel" id="empCode" placeholder="VD: PCID11111" value="${empId}" oninput="onEmpCode()" style="min-width:170px">
+      ${dateBar()}`;
   }
 }
 function ceoEmpOpts(dept,sel){const list=dept==="all"?EMP:(byDept[dept]||[]);return `<option value="all" ${sel==="all"?"selected":""}>Tất cả nhân viên</option>`+list.map(e=>`<option value="${e.name}" ${e.name===sel?"selected":""}>${e.name}</option>`).join("");}
 function onDeptCeo(){F.dept=document.getElementById("fDept").value;F.emp="all";renderFilter("ceo");renderCeo();}
-function onFilter(){F.dept=document.getElementById("fDept").value;F.emp=(document.getElementById("fEmpCeo")||{}).value||"all";F.time=document.getElementById("fTime").value;renderCeo();}
+function onFilter(){F.dept=(document.getElementById("fDept")||{}).value||F.dept;F.emp=(document.getElementById("fEmpCeo")||{}).value||"all";renderCeo();}
 function curPage(){return document.getElementById("pageCeo").classList.contains("on")?"ceo":"emp";}
 
 /* ===== tree table ===== */
-function treeTable(headers,rows){
-  const head=`<tr>${headers.map((h,i)=>`<th>${h}</th>`).join("")}</tr>`;
+function treeTable(headers,rows,aligns){aligns=aligns||[];
+  const head=`<tr>${headers.map((h,i)=>`<th${aligns[i]==="r"?' style="text-align:right"':''}>${h}</th>`).join("")}</tr>`;
   const body=rows.map(r=>{const caret=r.expandable?`<span class="caret" onclick="treeTog('${r.key}')">▸</span>`:`<span class="caret"></span>`;
-    const cells=r.cells.map((c,i)=>i===0?`<td><div class="nm">${caret}<span>${c}</span></div></td>`:`<td>${c}</td>`).join("");
+    const cells=r.cells.map((c,i)=>i===0?`<td><div class="nm">${caret}<span>${c}</span></div></td>`:`<td${aligns[i]==="r"?' style="text-align:right;font-variant-numeric:tabular-nums"':''}>${c}</td>`).join("");
     return `<tr class="lvl${r.level} ${r.cls||''}" data-key="${r.key}" data-parent="${r.parent||''}" ${r.level>0?'style="display:none"':''}>${cells}</tr>`;}).join("");
   return `<table class="tree"><thead>${head}</thead><tbody>${body}</tbody></table>`;
 }
@@ -290,36 +294,49 @@ function renderCeo(){
     kpi("Đang quá hạn",od.length,"r",od.length?("trễ TB "+(od.reduce((a,t)=>a+lateD(t),0)/od.length).toFixed(1)+" ngày"):"")+
     kpi("Tỷ lệ đúng hạn",rate+"%","g",dn.length+" task đã xong")+
     kpi("Tổng giá trị dự án",usd(totalVal),"",codesAll.length+" dự án đang chạy");
-  const ds=deptStats().sort((a,b)=>b.ovRatio-a.ovRatio||b.od-a.od);
-  document.getElementById("deptCompare").innerHTML=ds.map(s=>{const pctOv=Math.round(s.ovRatio*100);
-    return `<div class="deptbar"><div class="dn">${s.d}<small>${s.open} task mở · đúng hạn ${s.rate}%</small></div>
-    <div class="bar"><i style="width:${Math.max(pctOv,3)}%;background:${pctOv>=40?'var(--red)':pctOv>=20?'var(--amber)':'var(--green)'}"></i><span style="color:${pctOv>=20?'#fff':'var(--ink2)'}">${s.od} quá hạn (${pctOv}%)</span></div>
-    <div class="rt">trễ TB ${s.al?s.al.toFixed(1)+'đ':'—'}</div></div>`;}).join("");
+  renderDeptCompare();
   renderChase();renderTimeline();
 }
+function renderDeptCompare(){
+  const ds=deptStats().sort((a,b)=>b.ovRatio-a.ovRatio||b.od-a.od);
+  let id=0;const rows=[];
+  ds.forEach(s=>{const dKey="D"+(id++);const emps=byDept[s.d]||[];
+    let G=0,LA=0,OV=0,OO=0,HOLD=0;
+    const er=emps.map(e=>{const ts=DATA.filter(t=>t.owner===e.name);
+      const hold=ts.filter(t=>["overdue","due_soon","open"].includes(cls(t))).length;
+      const ovt=ts.filter(t=>cls(t)==="overdue");
+      const g=ts.filter(t=>cls(t)==="done_ontime").length,la=ts.filter(t=>cls(t)==="done_late").length,oo=ts.filter(t=>["open","due_soon"].includes(cls(t))).length;
+      const d2=g+la,rt=d2?Math.round(g/d2*100):100;const al=ovt.length?ovt.reduce((a,t)=>a+lateD(t),0)/ovt.length:0;
+      G+=g;LA+=la;OV+=ovt.length;OO+=oo;HOLD+=hold;
+      return {e,hold,ov:ovt.length,g,la,oo,rt,al};});
+    const tt=Math.max(1,G+LA+OV+OO);
+    const bar=(g,la,ov,oo)=>{const t=Math.max(1,g+la+ov+oo);return `<div class="sbar"><i class="g" style="width:${g/t*100}%"></i><i class="a" style="width:${la/t*100}%"></i><i class="r" style="width:${ov/t*100}%"></i><i class="o" style="width:${oo/t*100}%"></i></div>`;};
+    const ovChip=n=>n?`<span class="chip red">${n}</span>`:`<span class="chip gray">0</span>`;
+    rows.push({key:dKey,parent:"",level:0,expandable:true,cells:[`<span class="dname">${s.d}</span>`,HOLD,ovChip(OV),bar(G,LA,OV,OO),s.rate+"%",s.al?s.al.toFixed(1)+"đ":"—"]});
+    er.sort((a,b)=>b.ov-a.ov||b.hold-a.hold).forEach(r=>{
+      rows.push({key:"e"+(id++),parent:dKey,level:1,expandable:false,cells:[`${r.e.name} <span class="sv">${r.e.id}</span>`,r.hold,ovChip(r.ov),bar(r.g,r.la,r.ov,r.oo),r.rt+"%",r.al?r.al.toFixed(1)+"đ":"—"]});});
+  });
+  const headers=["Phòng ban / Nhân viên","Đang giữ","Quá hạn","Đúng / chậm / miss / đang làm","Đúng hạn","Trễ TB"];
+  document.getElementById("deptCompare").innerHTML=`<div class="treewrap">${treeTable(headers,rows,["l","r","r","l","r","r"])}</div>`;
+}
 function renderChase(){
-  let id=0;const rows=[];const openList=[];let totalPeople=0;
+  let id=0;const rows=[];let totalTasks=0;
   const depList=F.dept==="all"?DEPTS:[F.dept];
   depList.forEach(dep=>{
     const peeps=(byDept[dep]||[]).filter(e=>F.emp==="all"||e.name===F.emp).map(e=>{const ts=DATA.filter(t=>t.owner===e.name);
-      const at=ts.filter(t=>isUrgent(t)&&passTime(t,F.time)).sort((a,b)=>lateD(b)-lateD(a)||(+a.deadline)-(+b.deadline));
-      return {e,at,od:at.filter(t=>cls(t)==="overdue").length};}).filter(p=>p.at.length);
+      const at=ts.filter(t=>cls(t)==="overdue"&&passRange(t)).sort((a,b)=>lateD(b)-lateD(a));
+      return {e,at,od:at.length};}).filter(p=>p.at.length);
     if(!peeps.length)return;
-    totalPeople+=peeps.length;
-    const depKey="d"+(id++);const depOd=peeps.reduce((a,p)=>a+p.od,0);
-    rows.push({key:depKey,parent:"",level:0,expandable:true,cells:[`<span class="dname">${dep}</span> <span class="chip ${depOd?'red':'gray'}">${depOd} quá hạn</span> <span class="chip gray">${peeps.length} người</span>`,"","","","","",""]});
-    openList.push(depKey);
-    peeps.forEach(p=>{const pKey="p"+(id++);const soon=p.at.length-p.od;
-      rows.push({key:pKey,parent:depKey,level:1,expandable:true,cells:[`${p.e.name} ${p.od?`<span class="chip red">${p.od} quá hạn</span>`:""} ${soon?`<span class="chip amber">${soon} sắp tới</span>`:""}`,"","","","","",""]});
-      if(p.od)openList.push(pKey);
-      p.at.forEach(t=>{const c=cls(t);
-        rows.push({key:"t"+(id++),parent:pKey,level:2,expandable:false,cells:[`<span class="sv">${t.id}</span>`,`<span class="chip svc">${t.svc}</span>`,`<b>${t.project}</b>`,t.customer,`${lbl(t)}<div class="sub">${t.block}</div>`,dt(t.deadline),c==="overdue"?`<span class="late">trễ ${lateD(t).toFixed(1)}đ</span>`:`<span class="chip amber">sắp tới</span>`,blink(t)]});});
+    const depKey="d"+(id++);const depOd=peeps.reduce((a,p)=>a+p.od,0);totalTasks+=depOd;
+    rows.push({key:depKey,parent:"",level:0,expandable:true,cells:[`<span class="dname">${dep}</span> <span class="chip red">${depOd} task chậm</span> <span class="chip gray">${peeps.length} người</span>`,"","","","","",""]});
+    peeps.forEach(p=>{const pKey="p"+(id++);
+      rows.push({key:pKey,parent:depKey,level:1,expandable:true,cells:[`${p.e.name} <span class="chip red">${p.od} task chậm</span>`,"","","","","",""]});
+      p.at.forEach(t=>{rows.push({key:"t"+(id++),parent:pKey,level:2,expandable:false,cells:[`<span class="sv">${t.id}</span>`,`<span class="chip svc">${t.svc}</span>`,`<b>${t.project}</b>`,t.customer,`${lbl(t)}<div class="sub">${t.block}</div>`,dt(t.deadline),`<span class="late">trễ ${lateD(t).toFixed(1)}đ</span>`,blink(t)]});});
     });
   });
-  document.getElementById("cntChase").textContent=totalPeople+" người cần giục";
-  const headers=["Phòng ban / Nhân sự / Việc","Quy trình","Dự án","Khách hàng","Bước đang giữ","Hạn","Tình trạng",""];
-  document.getElementById("chase").innerHTML=rows.length?treeTable(headers,rows):`<div class="muted" style="padding:18px">Không có ai đang nợ task trong bộ lọc hiện tại.</div>`;
-  openList.forEach(k=>treeTog(k));
+  document.getElementById("cntChase").textContent=totalTasks+" task quá hạn";
+  const headers=["Phòng ban / Nhân sự / Việc","Quy trình","Dự án","Khách hàng","Bước đang giữ","Hạn","Trễ",""];
+  document.getElementById("chase").innerHTML=rows.length?treeTable(headers,rows):`<div class="muted" style="padding:18px">Không có task nào quá hạn trong bộ lọc hiện tại.</div>`;
 }
 /* ===== Timeline ===== */
 const NTL=18, TODX=4;
@@ -331,7 +348,7 @@ function renderTimeline(){
   let codes=[...new Set(DATA.map(t=>t.project))];
   if(F.dept!=="all")codes=codes.filter(c=>DATA.some(t=>t.project===c&&t.dept===F.dept));
   if(F.emp!=="all")codes=codes.filter(c=>DATA.some(t=>t.project===c&&t.owner===F.emp));
-  if(F.time!=="all")codes=codes.filter(c=>DATA.some(t=>t.project===c&&passTime(t,F.time)));
+  if(F.time!=="all")codes=codes.filter(c=>DATA.some(t=>t.project===c&&passRange(t)));
   const list=codes.map(projInfo).sort((a,b)=>({red:0,amber:1,green:2}[a.vcls]-{red:0,amber:1,green:2}[b.vcls])||(+a.custDue)-(+b.custDue));
   const head=`<tr><th class="l">Dự án</th><th class="l">Khách / Sản phẩm</th><th>Loại đơn</th><th>Giá trị</th><th class="l">Giai đoạn</th>
     ${TLDAYS.map((d,i)=>`<th class="day ${i===TODX?'today':''}">${d.toLocaleDateString("vi-VN",{day:"2-digit"})}</th>`).join("")}<th>Đánh giá</th></tr>`;
@@ -349,11 +366,8 @@ function renderTimeline(){
 }
 
 /* ===== Employee ===== */
-let empDept=DEPTS[0], empId="";
-function fillEmpSel(){const es=byDept[empDept]||[];const sel=document.getElementById("fEmp");
-  sel.innerHTML=es.map(e=>`<option value="${e.id}">${e.name} (${e.id})</option>`).join("");
-  if(!es.find(e=>e.id===empId))empId=es[0]?es[0].id:"";sel.value=empId;}
-function onFilterEmp(deptChanged){if(deptChanged){empDept=document.getElementById("fDept").value;fillEmpSel();}empId=document.getElementById("fEmp").value;renderEmp();}
+let empId="";
+function onEmpCode(){const v=(document.getElementById("empCode").value||"").trim().toUpperCase();const emp=EMP.find(e=>e.id===v);empId=emp?emp.id:"";renderEmp();}
 function taskRow(t){const c=cls(t);const cl=c==="overdue"?"over":c==="due_soon"?"soon":c==="pending"?"pend":"open";
   if(c==="pending"){const stg=projectStages(t.project);const cur=stg.findIndex(s=>s.state==="cur");const myK=stg.findIndex(s=>s.t===t);const left=cur>=0?myK-cur:0;
     return `<div class="tk pend"><div class="mn"><div class="l1"><span class="sv">${t.id}</span> ${t.project} · ${t.customer}${t.prod?' — '+t.prod:''}</div>
@@ -375,12 +389,12 @@ function tasksTable(list,mode){
   return `<div class="treewrap"><table class="tree"><thead>${head}</thead><tbody>${body}</tbody></table></div>`;
 }
 function renderEmp(){
-  const time=(document.getElementById("fTime")||{}).value||"all";F.time=time;
+  F.from=(document.getElementById("fFrom")||{}).value||"";F.to=(document.getElementById("fTo")||{}).value||"";
   const emp=EMP.find(e=>e.id===empId);const box=document.getElementById("empResult");
-  if(!emp){box.innerHTML=`<div class="muted">Chọn nhân viên.</div>`;return;}
+  if(!emp){box.innerHTML=`<div class="muted" style="padding:48px 4px;text-align:center">Nhập mã nhân viên ở ô phía trên để xem báo cáo (ví dụ: PCID11111).</div>`;return;}
   const owner=emp.name;let mine=DATA.filter(t=>t.owner===owner);
-  const doing=mine.filter(t=>["overdue","due_soon","open"].includes(cls(t))&&passTime(t,time)).sort((a,b)=>(+a.deadline||9e15)-(+b.deadline||9e15));
-  const todo=mine.filter(t=>cls(t)==="pending"&&passTime(t,time));const urgent=mine.filter(isUrgent);
+  const doing=mine.filter(t=>["overdue","due_soon","open"].includes(cls(t))&&passRange(t)).sort((a,b)=>(+a.deadline||9e15)-(+b.deadline||9e15));
+  const todo=mine.filter(t=>cls(t)==="pending"&&passRange(t));const urgent=mine.filter(isUrgent);
   const overdue=doing.filter(t=>cls(t)==="overdue");
   const active=doing.filter(t=>["open","due_soon"].includes(cls(t)));
   const soon=doing.filter(t=>cls(t)==="due_soon").length;
@@ -389,11 +403,11 @@ function renderEmp(){
   const all=[...new Set(mine.map(t=>t.project))];
   function pr(c){const mt=mine.filter(t=>t.project===c);const ac=mt.filter(t=>["overdue","due_soon","open"].includes(cls(t)));if(ac.some(t=>cls(t)==="overdue"))return 0;if(ac.length)return 1;const pd=mt.filter(t=>cls(t)==="pending");if(pd.length){const ms=Math.min(...pd.map(t=>t.stageIdx));const cur=projectStages(c).find(s=>s.state==="cur");if(cur&&cur.stageIdx>=ms-2)return 2;return 3;}return 4;}
   let codes=all.map(c=>[c,pr(c)]).filter(x=>x[1]<=2).sort((a,b)=>a[1]-b[1]).map(x=>x[0]);
-  if(time!=="all")codes=codes.filter(c=>mine.some(t=>t.project===c&&passTime(t,time)));
+  if(F.from||F.to)codes=codes.filter(c=>mine.some(t=>t.project===c&&passRange(t)));
   let id=0;const rows=[];const openList=[];
   codes.forEach(code=>{const info=projInfo(code);const meta=info.meta;const pKey="P"+(id++);
     const hot=info.stg.some(s=>s.t.owner===owner&&cls(s.t)==="overdue");
-    rows.push({key:pKey,parent:"",level:0,expandable:true,cells:[`<span class="pcode">${code}</span> <span class="pdesc">${meta.customer}${meta.prod?' — '+meta.prod:''}</span> <span class="chip gray">${info.type||""}</span> <span class="chip ${info.vcls}">${info.verdict}</span> <span class="pdesc">💰 ${usd(info.value)} · giao ${dd(info.custDue)}</span>`,"","","",""]});
+    rows.push({key:pKey,parent:"",level:0,expandable:true,cells:[`<span class="pcode">${code}</span> <span class="pdesc">${meta.customer}${meta.prod?' — '+meta.prod:''}${info.type?' · '+info.type:''}</span> <span class="chip ${info.vcls}">${info.verdict}</span>`,"","","",""]});
     if(hot)openList.push(pKey);
     info.stg.forEach(s=>{const t=s.t;const me=t.owner===owner;const c=cls(t);
       rows.push({key:"q"+(id++),parent:pKey,level:1,expandable:false,cls:me?"mine":"",cells:[`<span class="chip svc">${t.svc}</span> ${lbl(t)}`,`${me?'<span class="meb">● </span>':''}${t.owner}`,dt(t.deadline),statusChip(c),blink(t)]});});
