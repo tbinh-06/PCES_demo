@@ -269,14 +269,15 @@ function DEMO(){
   return orders;
 }
 const C={
-  proc:["Dịch vụ"],project:["Tên dự án","Dự án"],customer:["Danh sách khách hàng theo dõi dự án","Tên khách hàng"],
-  total:["Tổng","Tổng tiền(USD)","Báo giá KH"],qty:["SL"],id:["ID"],stageId:["ID khối của phiếu"],created:["Tạo lúc"],
+  proc:["Dịch vụ"],project:["Tên dự án","Dự án"],customer:["Danh sách khách hàng theo dõi dự án","Tên khách hàng"],name:["Tên"],
+  total:["Tổng","Tổng tiền(USD)"],qty:["SL"],id:["ID"],stageId:["ID khối của phiếu"],created:["Tạo lúc"],
   reqDel:["Ngày giao hàng","Ngày khách yêu cầu giao hàng"],ship:["Hình thức sản xuất","Loại shipment"],status:["Trạng thái"],
   block:["Tên khối"],assignee:["Người thực hiện"],po:["Đơn đặt hàng PO"],supplier:["Nhà cung cấp"],
   deposit:["Cọc sau kí hợp đồng"],payOnShip:["Thanh toán khi có thông báo giao hàng"],payAfter:["Thanh toán sau giao hàng"],payDue:["Thời hạn thanh toán sau giao hàng"]
 };
 function pick(r,names){for(const n of names){const v=r[n];if(v!=null&&String(v).trim()!=="")return v;}return "";}
 function firstCust(v){return String(v||"").split(/[;,\/\n]/)[0].trim();}
+function custName(v){const s=String(v||"");const m=s.match(/Tên khách hàng\s*:\s*([^\n;]+)/i);if(m&&m[1].trim())return m[1].trim();const mc=s.match(/Mã khách hàng\s*:\s*([^\n;]+)/i);if(mc&&mc[1].trim())return mc[1].trim();return firstCust(s);}
 function money(v){return +(String(v==null?"":v).replace(/[^\d.\-]/g,""))||0;}
 function toDate(v){if(!v)return null;if(v instanceof Date)return isNaN(v)?null:v;const s=String(v).trim();
   let m=s.match(/^(\d{1,2}):(\d{2})\s+(\d{1,2})\/(\d{1,2})\/(\d{4})$/);if(m)return new Date(+m[5],+m[4]-1,+m[3],+m[1],+m[2]);
@@ -294,12 +295,13 @@ function stageOf(proc,block){const p=String(proc==null?"":proc).toLowerCase(),b=
 function mapLive(arr){
   const byProj={};
   arr.forEach(r=>{
-    const proj=pick(r,C.project)||firstCust(pick(r,C.customer))||"(không rõ)";
-    const o=byProj[proj]||(byProj[proj]={code:proj,customer:"",value:0,qty:0,createdAt:null,reqDelivery:null,stage:0,stageStatus:"",shipment:"",delivered:false,actualDelivery:null,onTime:null,link:"",poCount:0,procs:[],paid:0,dueDate:null,recvLink:"",pos:[]});
-    const proc=pick(r,C.proc),block=pick(r,C.block),status=pick(r,C.status);
     const id=pick(r,C.id),sid=pick(r,C.stageId),link=id?BASE_TICKET+id+(sid?"?stage_id="+sid:""):"";
-    const cust=firstCust(pick(r,C.customer));if(cust)o.customer=cust;
-    const isPO=/\bPO\b|mua hàng|xử lý PO/i.test(proc)||(pick(r,C.po)&&!/RFQ|báo giá/i.test(proc));
+    const key=id?("#"+id):(pick(r,C.name)||pick(r,C.project)||firstCust(pick(r,C.customer))||"(không rõ)");
+    const o=byProj[key]||(byProj[key]={code:pick(r,C.name)||pick(r,C.project)||(id?("Phiếu "+id):key),project:pick(r,C.project)||"",customer:"",value:0,qty:0,createdAt:null,reqDelivery:null,stage:0,stageStatus:"",shipment:"",delivered:false,actualDelivery:null,onTime:null,link:"",poCount:0,procs:[],paid:0,dueDate:null,recvLink:"",pos:[]});
+    const proc=pick(r,C.proc),block=pick(r,C.block),status=pick(r,C.status);
+    const nm=pick(r,C.name);if(nm)o.code=nm;
+    const cust=custName(pick(r,C.customer));if(cust)o.customer=cust;
+    const isPO=/\bPO\b|mua hàng|xử lý PO/i.test(String(proc))||(pick(r,C.po)&&!/RFQ|báo giá/i.test(String(proc)));
     if(isPO){o.pos.push({poNo:pick(r,C.po)||("PO-"+id),supplier:pick(r,C.supplier)||"NCC",value:money(pick(r,C.total)),paid:0,link,due:toDate(pick(r,C.payDue))});o.poCount++;}
     else{o.value=Math.max(o.value,money(pick(r,C.total)));o.qty=Math.max(o.qty,money(pick(r,C.qty)));
       o.paid+=money(pick(r,C.deposit))+money(pick(r,C.payOnShip))+money(pick(r,C.payAfter));
@@ -309,7 +311,7 @@ function mapLive(arr){
     const ship=pick(r,C.ship);if(ship)o.shipment=ship;
     const st=stageOf(proc,block);if(st>=o.stage){o.stage=st;o.stageStatus=status;}
     if(!o.link)o.link=link;
-    o.procs.push({proc:proc||block||"(quy trình)",block:block||"",status:status||"",assignee:pick(r,C.assignee)||"",created:cr,doneAt:/hoàn thành|done|xong|đã giao/i.test(status||"")?cr:null,link});
+    o.procs.push({proc:String(proc||block||"(quy trình)"),block:String(block||""),status:String(status||""),assignee:pick(r,C.assignee)||"",created:cr,doneAt:/hoàn thành|done|xong|đã giao/i.test(String(status))?cr:null,link});
   });
   const doneRe=/hoàn thành|hoàn tất|done|xong|đã giao|completed/i;
   return Object.values(byProj).map(o=>{if(!o.customer)o.customer="(chưa rõ KH)";
