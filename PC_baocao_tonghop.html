@@ -711,8 +711,10 @@ async function load(){
     const arr=j.data||j;const cnt=Array.isArray(arr)?arr.length:0;
     if(!cnt){SRC_DIAG="Kết nối OK nhưng Sheet nguồn chưa có dữ liệu (count="+(j.count!=null?j.count:0)+").\n→ Sheet 'Service Tickets' và các sheet con mới chỉ có header, chưa có dòng phiếu nào. Cần có dữ liệu thật từ Service.";throw 0;}
     const mapped=mapLive(arr);
+    const real=mapped.filter(o=>o.code&&o.code!=="(không rõ)"&&(o.customer&&o.customer!=="(chưa rõ KH)"||o.link||o.value>0));
     if(!mapped.length){SRC_DIAG="Đọc được "+cnt+" dòng nhưng không gom được đơn nào.\n→ Tên cột trong Sheet không khớp map (kiểm tra header: Tên dự án, Danh sách khách hàng…).";throw 0;}
-    ORD=mapped;SRC_DIAG="Đã kết nối trực tiếp: "+mapped.length+" đơn từ "+cnt+" dòng dữ liệu.";setSrc(true);
+    if(!real.length){SRC_DIAG="Kết nối OK, đọc "+cnt+" dòng nhưng các cột then chốt (ID / Tên dự án / Danh sách khách hàng / Trạng thái) đang TRỐNG.\n→ Các sheet con chỉ chứa dữ liệu file của KHỐI; sheet tổng hợp 'Service Tickets' chưa có dữ liệu phiếu. Cần đổ dữ liệu phiếu vào sheet 'Service Tickets'.";throw 0;}
+    ORD=mapped;SRC_DIAG="Đã kết nối trực tiếp: "+real.length+" đơn từ "+cnt+" dòng dữ liệu.";setSrc(true);
   }catch(e){
     if(e&&e.message)SRC_DIAG="Không gọi được URL (CORS hoặc mạng): "+e.message+".\n→ Thử mở thẳng URL /exec trên trình duyệt: nếu thấy JSON {ok,count,data} là URL OK; nếu lỗi/đăng nhập là do quyền deploy.";
     ORD=DEMO();setSrc(false);
