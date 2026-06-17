@@ -376,8 +376,8 @@ function renderKpiProj(){
   document.getElementById("kpiProj").innerHTML=
     k("Tổng đơn / dự án",n,"t",r("Số khách hàng",nCust)+r("Giá trị TB/đơn",usd(n?total/n:0)))+
     k("Tổng giá trị đơn",usd(total),"b",r("Trên",n+" đơn")+r("TB/đơn",usd(n?total/n:0)))+
-    k("Đơn đang thực hiện",active,"a",r("% trên tổng",pctOf(active)+"%")+r("Giá trị",usd(activeVal))+r("Trễ hạn",late+" đơn",late?"neg":""))+
-    k("Đơn đã giao",done.length,"g",r("% trên tổng",pctOf(done.length)+"%")+r("Giá trị",usd(doneVal))+r("Đúng hạn",onTime+" đơn"))+
+    k("Đơn đang thực hiện",active,"a",r("% trên tổng",pctOf(active)+"%")+r("Giá trị",usd(activeVal)))+
+    k("Đơn đã giao",done.length,"g",r("% trên tổng",pctOf(done.length)+"%")+r("Giá trị",usd(doneVal)))+
     k("Đơn trễ hạn",late,late?"r":"g",r("% trên tổng",pctOf(late)+"%")+r("Giá trị đơn trễ",usd(lateVal),late?"neg":""))+
     k("Tỉ lệ giao đúng hạn",otRate+"%",otRate>=80?"g":otRate>=50?"a":"r",`<div class="row"><span class="l">Trên ${done.length} đơn đã giao</span><span class="v"><span class="bdg ${otRate>=80?'bG':'bM'}">${otRate>=80?'Tốt':'Theo dõi'}</span></span></div>`);
 }
