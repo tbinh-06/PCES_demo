@@ -6,37 +6,41 @@
 <title>P&C — Trung tâm vận hành & báo cáo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#EEF3F7;--panel:#FFFFFF;--panel2:#F4F8FB;
-    --ink:#0E1A24;--ink2:#3A4A57;--ink3:#76889A;--line:#D5E0E8;
-    --ocean:#0B6CB0;--ocean-deep:#073B63;--ocean-mid:#0E84C9;--ocean-soft:#E3EFF8;
-    --form:#5B6B7A;--step:#0B6CB0;--approve:#B45309;--cond:#5B53C6;
-    --service:#0E8A6E;--merge:#5B6B7A;--end:#2E7D32;
-    --go:#2E7D32;--go-soft:#E4F0E5;--stop:#C2333A;--stop-soft:#FBE9EA;--loop:#5B53C6;--loop-soft:#ECEAFA;
-    --disp:"Plus Jakarta Sans",system-ui,sans-serif;--body:"Inter",system-ui,sans-serif;--mono:"JetBrains Mono",monospace;}
+    --bg:#F4F6FA;--panel:#FFFFFF;--panel2:#F0F3F8;
+    --ink:#1A2230;--ink2:#5A6678;--ink3:#8A95A8;--line:#E2E7F0;
+    --ocean:#3C8C95;--ocean-deep:#2A6B73;--ocean-mid:#4781BD;--ocean-soft:#E9F2FC;
+    --form:#5A6678;--step:#4781BD;--approve:#C0954A;--cond:#8E6FC0;
+    --service:#57A07A;--merge:#5A6678;--end:#57A07A;
+    --go:#57A07A;--go-soft:#E8F6EE;--stop:#CB6A62;--stop-soft:#FCEAEA;--loop:#8E6FC0;--loop-soft:#EFEAF8;
+    --disp:"Inter",system-ui,sans-serif;--body:"Inter",system-ui,sans-serif;--mono:"Inter",system-ui,sans-serif;}
   *{box-sizing:border-box}
   html{scroll-behavior:smooth}
   body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
   .wrap{max-width:1180px;margin:0 auto;padding:0 26px}
   a{color:var(--ocean);text-decoration:none}
 
-  .hero{background:linear-gradient(135deg,#073B63 0%,#0B6CB0 60%,#0E84C9 100%);color:#fff;position:relative;overflow:hidden}
-  .hero::after{content:"";position:absolute;inset:0;
-    background-image:radial-gradient(circle at 1px 1px,rgba(255,255,255,.10) 1px,transparent 0);background-size:22px 22px;opacity:.5}
-  .hero .wrap{position:relative;z-index:1;padding:46px 26px 40px}
-  .brand{display:flex;align-items:center;gap:11px;font-family:var(--mono);font-size:12.5px;letter-spacing:.05em;color:#BFE0F5}
-  .brand .logo{width:26px;height:26px;border-radius:7px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);
-    display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-weight:800;font-size:13px;color:#fff}
-  h1{font-family:var(--disp);font-weight:800;font-size:clamp(28px,4.2vw,44px);line-height:1.04;margin:18px 0 0;letter-spacing:-.02em}
-  .lede{font-size:16.5px;color:#DCEBF7;max-width:66ch;margin:14px 0 0;line-height:1.55}
-  .lede b{color:#fff;font-weight:600}
-  .lede code{font-family:var(--mono);font-size:.84em;background:rgba(255,255,255,.14);border-radius:5px;padding:1px 6px}
-  .stats{display:flex;flex-wrap:wrap;gap:26px;margin-top:26px}
-  .stat .v{font-family:var(--disp);font-weight:800;font-size:30px;line-height:1}
-  .stat .l{font-size:12.5px;color:#BFE0F5;margin-top:5px}
-  .stat .v small{font-size:14px;font-weight:600;color:#BFE0F5}
+  .topbar{display:flex;align-items:center;gap:12px;padding:14px 26px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:30}
+  .topbar .logo{width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,#1A2230,#3C8C95);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-weight:800;font-size:12px}
+  .topbar .bnm{font-family:var(--disp);font-weight:700;font-size:15px;letter-spacing:-.01em}
+  .topbar .bsub{font-size:11px;color:var(--ink3)}
+  .topbar .acts{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+  .btn{font-size:12.5px;font-weight:600;padding:8px 14px;border-radius:9px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;color:var(--ink2);transition:.14s}
+  .btn:hover{background:var(--panel2)}
+  .btn.primary{background:var(--ocean);color:#fff;border-color:var(--ocean)}
+  .btn.primary:hover{filter:brightness(.94)}
+  .hero{padding:42px 0 6px}
+  .hero .eyebrow{font-family:var(--disp);font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--ocean)}
+  h1{font-family:var(--disp);font-weight:800;font-size:clamp(26px,3.6vw,38px);line-height:1.14;margin:13px 0 0;letter-spacing:-.02em;color:var(--ink);max-width:22ch}
+  .lede{font-size:15.5px;color:var(--ink2);max-width:64ch;margin:14px 0 0;line-height:1.6}
+  .lede b{color:var(--ink);font-weight:600}
+  .lede i{color:var(--ink3);font-style:italic}
+  .stats{display:flex;flex-wrap:wrap;gap:12px;margin-top:24px}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:13px 18px;min-width:128px}
+  .stat .v{font-family:var(--disp);font-weight:800;font-size:26px;line-height:1;color:var(--ocean)}
+  .stat .l{font-size:12px;color:var(--ink3);margin-top:5px}
 
   .ribbon{background:var(--panel);border-bottom:1px solid var(--line)}
   .ribbon .wrap{display:flex;align-items:center;gap:8px;padding:14px 26px;overflow-x:auto}
@@ -52,9 +56,9 @@
   .sec-h .hint code{font-family:var(--mono);font-size:.86em;background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:1px 6px}
 
   .reports{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:18px 0 12px}
-  .rcard{display:block;background:linear-gradient(135deg,#0B6CB0,#0E84C9);color:#fff;border-radius:16px;padding:20px 18px;position:relative;overflow:hidden;text-decoration:none;transition:transform .15s ease,box-shadow .15s ease}
-  .rcard.green{background:linear-gradient(135deg,#0E8A6E,#13A98A)}
-  .rcard.deep{background:linear-gradient(135deg,#073B63,#0B6CB0)}
+  .rcard{display:block;background:linear-gradient(135deg,#2F6E78,#3C8C95);color:#fff;border-radius:16px;padding:20px 18px;position:relative;overflow:hidden;text-decoration:none;transition:transform .15s ease,box-shadow .15s ease}
+  .rcard.green{background:linear-gradient(135deg,#3E8A6E,#57A07A)}
+  .rcard.deep{background:linear-gradient(135deg,#234E5C,#3C7DA0)}
   .rcard::after{content:"";position:absolute;inset:0;background-image:radial-gradient(circle at 1px 1px,rgba(255,255,255,.12) 1px,transparent 0);background-size:18px 18px;opacity:.55}
   .rcard:hover{transform:translateY(-4px);box-shadow:0 16px 34px rgba(7,59,99,.24)}
   .rcard>*{position:relative;z-index:1}
@@ -154,30 +158,122 @@
   footer{border-top:1px solid var(--line);padding:24px 0 50px;color:var(--ink3);font-size:12.7px}
   footer b{color:var(--ink2)}footer code{font-family:var(--mono);font-size:.9em}
 
-  @media(max-width:820px){.grid,.reports{grid-template-columns:1fr}}
+  .pintro{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--ocean);border-radius:12px;padding:15px 18px;margin:18px 0 4px;font-size:14px;color:var(--ink2);line-height:1.55}
+  .pintro b{color:var(--ink)} .pintro i{color:var(--ink3);font-style:italic}
+  .elev{background:#fff;border:1px solid var(--line);border-radius:20px;padding:8px 24px 26px;margin:20px 0;box-shadow:0 12px 34px rgba(28,45,72,.07)}
+  .elev .sec-h{margin-top:18px}
+  .pgrid{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:auto auto 1fr;column-gap:20px;row-gap:12px;margin:20px 0 4px}
+  .pcard{display:contents}
+  .pblock{border-radius:14px;padding:16px 17px;border:1px solid}
+  .pblock.pain{background:var(--stop-soft);border-color:#EFD4D1;grid-row:1}
+  .parrow{grid-row:2;text-align:center;font-size:10px;font-weight:700;color:var(--service);letter-spacing:.1em}
+  .pblock.sol{background:var(--go-soft);border-color:#CFE6D8;grid-row:3;display:flex;flex-direction:column}
+  .ptag{font-size:10.5px;font-weight:700;color:var(--stop);letter-spacing:.04em;text-transform:uppercase}
+  .stag{font-size:10.5px;font-weight:700;color:var(--service);letter-spacing:.04em;text-transform:uppercase}
+  .ptxt{font-size:13.5px;color:var(--ink2);line-height:1.55;margin-top:8px}
+  .ptxt b{color:var(--ink);font-weight:600}
+  .stitle{font-size:13px;font-weight:700;color:var(--ink);margin-top:9px}
+  .sul{margin:11px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px}
+  .sul li{display:grid;grid-template-columns:13px 142px 1fr;column-gap:8px;align-items:start;font-size:12.6px;line-height:1.5}
+  .sul li::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--service);margin-top:6px}
+  .sul li .lbl{font-weight:600;color:var(--ink)}
+  .sul li .dsc{color:var(--ink2)}
+  .slink{margin-top:auto;padding-top:14px}
+  .slink a{font-size:12px;font-weight:600;color:var(--ocean);display:inline-flex;align-items:center;gap:6px}
+  .slink a:hover{text-decoration:underline}
+  @media(max-width:820px){.grid,.reports{grid-template-columns:1fr}.pgrid{grid-template-columns:1fr;grid-template-rows:none}.pblock.pain,.parrow,.pblock.sol{grid-row:auto}}
   @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
 
-<header class="hero">
-  <div class="wrap">
-    <div class="brand"><span class="logo">P&amp;C</span> CÔNG TY TNHH GIẢI PHÁP DOANH NGHIỆP P&amp;C · BASE.VN SERVICE</div>
-    <h1>Trung tâm vận hành &amp; báo cáo</h1>
-    <p class="lede">Xưởng <b>lắp ráp – gia công điện tử (EMS)</b> bán theo đơn &amp; dự án. Mở nhanh <b>3 báo cáo</b> bên dưới,
-      hoặc xem <b>bản đồ quy trình</b> — bấm vào ô bất kỳ để xem flow chi tiết như trên Base.</p>
-    <div class="stats">
-      <div class="stat"><div class="v">3</div><div class="l">báo cáo điều hành</div></div>
-      <div class="stat"><div class="v">14</div><div class="l">quy trình & QT con</div></div>
-      <div class="stat"><div class="v">7</div><div class="l">pha vòng đời một đơn</div></div>
-    </div>
+<header class="topbar">
+  <span class="logo">P&amp;C</span>
+  <div><div class="bnm">P&amp;C Solutions</div><div class="bsub">Giải pháp Doanh nghiệp · Base.vn Service</div></div>
+  <div class="acts">
+    <a class="btn" href="PC_techmap.html" target="_blank" rel="noopener">⤢ Sơ đồ giải pháp công nghệ</a>
+    <a class="btn" href="PC_baocao_congviec.html">Báo cáo công việc</a>
+    <a class="btn" href="PC_baocao_tonghop.html">Báo cáo tổng hợp</a>
   </div>
 </header>
 
-<div class="ribbon"><div class="wrap" id="ribbon"></div></div>
+<div class="wrap">
+  <section class="hero">
+    <div class="eyebrow">Trung tâm vận hành &amp; báo cáo</div>
+    <h1>Số hóa vận hành đơn hàng</h1>
+    <p class="lede">Khách dùng <b>Base Service</b> nhưng quy trình bị tách nhỏ, dữ liệu phân mảnh. Trang này tóm tắt <b>luồng hiện tại của khách</b>, các <b>bài toán → giải pháp</b>, và mở nhanh <b>báo cáo điều hành</b> đọc trực tiếp từ Service. <i>(Đang chờ tài khoản hệ thống Service để đối chiếu số liệu thật.)</i></p>
+    <div class="stats">
+      <div class="stat"><div class="v">2</div><div class="l">báo cáo điều hành</div></div>
+      <div class="stat"><div class="v">14</div><div class="l">quy trình &amp; QT con</div></div>
+      <div class="stat"><div class="v">7</div><div class="l">pha vòng đời một đơn</div></div>
+    </div>
+  </section>
+</div>
+
 
 <main>
   <div class="wrap">
+    <div class="elev">
+    <div class="sec-h"><h2>Bài toán của PCES → Giải pháp</h2><span class="hint">Mỗi điểm nghẽn → một dashboard điều hành real-time</span></div>
+    <div class="pintro">PCES đang dùng <b>Base Service</b> nhưng quy trình bị tách nhỏ, dữ liệu phân mảnh. Ba dashboard dưới đây đọc trực tiếp từ Service, cập nhật real-time. <i>(Đang chờ tài khoản hệ thống Service để đối chiếu số liệu thật.)</i></div>
+    <div class="pgrid">
+
+      <div class="pcard">
+        <div class="pblock pain">
+          <div class="ptag">⚠ Pain 01 · Công việc</div>
+          <div class="ptxt">Nhiều quy trình nên nhân sự <b>thường xuyên miss việc</b>, công việc <b>trễ / tắc</b>; CEO phải nhắc mới biết.</div>
+        </div>
+        <div class="parrow">↓ GIẢI PHÁP</div>
+        <div class="pblock sol">
+          <div class="stag">✓ Dashboard công việc · real-time</div>
+          <div class="stitle">Để CEO &amp; trưởng phòng nhìn được:</div>
+          <ul class="sul">
+            <li><span class="lbl">Đơn / khách quan trọng đang trễ hoặc có nguy cơ trễ</span><span class="dsc">→ để ưu tiên xử lý ngay.</span></li>
+            <li><span class="lbl">Bước nào trong quy trình bị block nhiều</span><span class="dsc">→ có phương án, hoặc điều chỉnh thời gian (SLA) cho bước đó.</span></li>
+            <li><span class="lbl">Workload từng nhân sự</span><span class="dsc">→ ai hay chậm trễ thì không giao thêm, ai đang quá tải thì không giao thêm.</span></li>
+          </ul>
+          <div class="slink"><a href="PC_baocao_congviec.html">Mở báo cáo công việc →</a></div>
+        </div>
+      </div>
+
+      <div class="pcard">
+        <div class="pblock pain">
+          <div class="ptag">⚠ Pain 02 · Công nợ</div>
+          <div class="ptxt">Một đơn hàng có <b>nhiều PO mua từ nhiều NCC</b> khác nhau → công nợ phải thu (khách) &amp; phải trả (NCC) rải rác, khó tổng hợp.</div>
+        </div>
+        <div class="parrow">↓ GIẢI PHÁP</div>
+        <div class="pblock sol">
+          <div class="stag">✓ Dashboard công nợ · real-time</div>
+          <div class="stitle">Để kế toán &amp; CEO theo dõi:</div>
+          <ul class="sul">
+            <li><span class="lbl">Công nợ nào sắp đến hạn / đã quá hạn</span><span class="dsc">(cả phải thu khách &amp; phải trả NCC) → xử lý trước, không sót.</span></li>
+            <li><span class="lbl">Gom nhiều PO của một đơn về một chỗ</span><span class="dsc">→ biết một đơn đang nợ ai, bao nhiêu, đến hạn khi nào.</span></li>
+            <li><span class="lbl">Tuổi nợ &amp; dự báo dòng tiền</span><span class="dsc">2 tháng tới → chủ động thu/chi, giảm nợ xấu kéo dài.</span></li>
+          </ul>
+          <div class="slink"><a href="PC_baocao_tonghop.html">Mở báo cáo tổng hợp →</a></div>
+        </div>
+      </div>
+
+      <div class="pcard">
+        <div class="pblock pain">
+          <div class="ptag">⚠ Pain 03 · Đơn hàng &amp; khách</div>
+          <div class="ptxt">Quá nhiều quy trình nên khách <b>không biết đang có bao nhiêu đơn hàng / dự án</b>, đang ở đâu, của khách nào.</div>
+        </div>
+        <div class="parrow">↓ GIẢI PHÁP</div>
+        <div class="pblock sol">
+          <div class="stag">✓ Dashboard đơn hàng &amp; khách · real-time</div>
+          <div class="stitle">Để CEO &amp; kinh doanh nắm:</div>
+          <ul class="sul">
+            <li><span class="lbl">Tổng số đơn / dự án</span><span class="dsc">và từng đơn đang ở giai đoạn nào, đúng hạn hay trễ.</span></li>
+            <li><span class="lbl">Gom mọi quy trình rải rác về theo từng đơn</span><span class="dsc">→ một đơn xem được trọn vẹn tiến trình.</span></li>
+            <li><span class="lbl">Phân nhóm khách hàng</span><span class="dsc">(ưu tiên / tiềm năng) &amp; doanh thu → biết khách nào quan trọng để ưu tiên.</span></li>
+          </ul>
+          <div class="slink"><a href="PC_baocao_tonghop.html">Mở báo cáo tổng hợp →</a></div>
+        </div>
+      </div>
+
+    </div>
+
     <div class="sec-h"><h2>Báo cáo vận hành</h2><span class="hint">Dashboard trực tiếp từ dữ liệu Base.vn Service</span></div>
     <div class="reports">
       <a class="rcard" href="PC_baocao_congviec.html">
@@ -188,13 +284,15 @@
       </a>
       <a class="rcard green" href="PC_baocao_tonghop.html">
         <span class="ric">▦</span>
-        <div class="rt">Báo cáo tổng hợp</div>
-        <div class="rd">Đơn hàng &amp; tiến độ, công nợ phải thu / phải trả &amp; tuổi nợ, phân nhóm khách hàng (tần suất, AOV, doanh thu) — gộp 3 góc nhìn trong một báo cáo.</div>
+        <div class="rt">Báo cáo tổng hợp — Công nợ + Đơn hàng</div>
+        <div class="rd">Gồm cả <b>Công nợ</b> (phải thu khách / phải trả NCC, tuổi nợ) <b>và Đơn hàng</b> (tiến độ từng đơn) cùng phân nhóm khách hàng — 3 góc nhìn trong một báo cáo.</div>
         <span class="rgo">Mở báo cáo <i>→</i></span>
       </a>
     </div>
+    </div>
 
-    <div class="sec-h support-h"><h2>Bản đồ quy trình — Luồng đơn khách</h2><span class="hint">Theo hành trình một đơn · bấm để mở flow chi tiết</span></div>
+    <div class="sec-h" style="margin-top:34px"><h2>Luồng hiện tại của PCES</h2><span class="hint">Quy trình đang chạy trên Base.vn Service · bấm vào ô bất kỳ để mở flow chi tiết</span></div>
+    <div class="pintro">PCES đang dùng <b>Base Service</b> nhưng quy trình bị <b>tách thành nhiều luồng nhỏ</b> nên dữ liệu phân mảnh. Dưới đây là toàn bộ luồng hiện tại theo hành trình một đơn hàng.</div>
     <div class="grid" id="gridOrder"></div>
 
     <div class="sec-h support-h"><h2>Logistic</h2><span class="hint">Giao nhận — dùng chung cho lấy hàng đầu vào &amp; giao hàng cho khách</span></div>
@@ -445,9 +543,6 @@ function cardHTML(id){
 document.getElementById('gridOrder').innerHTML = ORDER.map(cardHTML).join('');
 document.getElementById('gridLogistic').innerHTML = LOGISTIC.map(cardHTML).join('');
 document.getElementById('gridSupport').innerHTML = SUPPORT.map(cardHTML).join('');
-document.getElementById('ribbon').innerHTML = RIBBON.map((r,i)=>
-  `<span class="rb"><span class="ph">${r[0]}</span><span class="nm">${r[1]}</span></span>`+
-  (i<RIBBON.length-1?'<span class="arr">→</span>':'')).join('');
 
 function stepHTML(n){
   const dec = n.br && n.br.length;
