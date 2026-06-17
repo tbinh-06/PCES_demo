@@ -354,7 +354,8 @@ function setOrd(f){ORDF=f;["all","active","late","done"].forEach(k=>document.get
 function setSide(s){SIDE=s;hmExp.clear();const map={recv:"tabRecv",pay:"tabPay",both:"tabBoth"};Object.keys(map).forEach(k=>document.getElementById(map[k]).classList.toggle("on",k===s));renderDebt();}
 function setMode(m){MODE=m;document.getElementById("mReal").classList.toggle("on",m==="real");document.getElementById("mCum").classList.toggle("on",m==="cum");renderCf();}
 function setInv(f){INVF=f;["all","over","soon"].forEach(k=>document.getElementById("i"+k[0].toUpperCase()+k.slice(1)).classList.toggle("on",k===f));renderInv();}
-function setSrc(live){const c=document.getElementById("srcChip");c.classList.toggle("live",live);c.textContent=live?"● Dữ liệu trực tiếp":"● Dữ liệu demo";}
+let SRC_DIAG="Chưa kết nối.";
+function setSrc(live){const c=document.getElementById("srcChip");c.classList.toggle("live",live);c.textContent=live?"● Dữ liệu trực tiếp":"● Dữ liệu demo (bấm xem lý do)";c.title=SRC_DIAG;c.style.cursor="pointer";c.onclick=()=>alert(SRC_DIAG);console.info("[PCES] "+SRC_DIAG);}
 function showPage(p){PAGE=p;
   ["proj","debt","cust"].forEach(x=>document.getElementById("page-"+x).classList.toggle("on",x===p));
   document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("on",b.dataset.page===p));
@@ -701,9 +702,21 @@ function render(){
   else{renderKpiCust();renderCustMonth();renderRev();renderSeg();renderCustTable();}
 }
 async function load(){
-  try{const res=await fetch(SOURCE_URL,{redirect:"follow"});const txt=await res.text();let j;try{j=JSON.parse(txt);}catch(_){throw 0;}
-    const arr=j.data||j;const mapped=mapLive(arr);if(!mapped.length)throw 0;ORD=mapped;setSrc(true);}
-  catch(e){ORD=DEMO();setSrc(false);}
+  try{
+    const res=await fetch(SOURCE_URL,{redirect:"follow"});
+    const txt=await res.text();
+    if(/<html|<!doctype|accounts\.google\.com|sign in|đăng nhập/i.test(txt.slice(0,500))){
+      SRC_DIAG="URL trả về trang HTML/đăng nhập (không phải JSON), status="+res.status+".\n→ Vào Apps Script → Deploy → sửa: Who has access = ANYONE (không cần đăng nhập).";throw 0;}
+    let j;try{j=JSON.parse(txt);}catch(_){SRC_DIAG="Phản hồi không phải JSON hợp lệ (status="+res.status+"). 200 ký tự đầu đã in ra Console.";console.warn("[PCES] raw:",txt.slice(0,300));throw 0;}
+    const arr=j.data||j;const cnt=Array.isArray(arr)?arr.length:0;
+    if(!cnt){SRC_DIAG="Kết nối OK nhưng Sheet nguồn chưa có dữ liệu (count="+(j.count!=null?j.count:0)+").\n→ Sheet 'Service Tickets' và các sheet con mới chỉ có header, chưa có dòng phiếu nào. Cần có dữ liệu thật từ Service.";throw 0;}
+    const mapped=mapLive(arr);
+    if(!mapped.length){SRC_DIAG="Đọc được "+cnt+" dòng nhưng không gom được đơn nào.\n→ Tên cột trong Sheet không khớp map (kiểm tra header: Tên dự án, Danh sách khách hàng…).";throw 0;}
+    ORD=mapped;SRC_DIAG="Đã kết nối trực tiếp: "+mapped.length+" đơn từ "+cnt+" dòng dữ liệu.";setSrc(true);
+  }catch(e){
+    if(e&&e.message)SRC_DIAG="Không gọi được URL (CORS hoặc mạng): "+e.message+".\n→ Thử mở thẳng URL /exec trên trình duyệt: nếu thấy JSON {ok,count,data} là URL OK; nếu lỗi/đăng nhập là do quyền deploy.";
+    ORD=DEMO();setSrc(false);
+  }
   buildFilter();updateRange();render();
 }
 if(typeof Chart!=="undefined"){Chart.defaults.font.family="Inter,-apple-system,sans-serif";Chart.defaults.font.size=11;Chart.defaults.color="#8295A8";}
