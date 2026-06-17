@@ -321,6 +321,7 @@ function mapLive(arr){
 
 /* ===== STATE ===== */
 let ORD=[],PAGE="proj",ORDF="all",SIDE="both",MODE="real",INVF="all";
+let LIVE=null,DEMO_DATA=[],USE_LIVE=false;
 let F={cust:"all",status:"all",from:"",to:""};
 const exp=new Set(),hmExp=new Set(),custExp=new Set();
 function isLate(o){return !o.delivered&&o.reqDelivery&&+o.reqDelivery<Date.now();}
@@ -357,12 +358,28 @@ function setSide(s){SIDE=s;hmExp.clear();const map={recv:"tabRecv",pay:"tabPay",
 function setMode(m){MODE=m;document.getElementById("mReal").classList.toggle("on",m==="real");document.getElementById("mCum").classList.toggle("on",m==="cum");renderCf();}
 function setInv(f){INVF=f;["all","over","soon"].forEach(k=>document.getElementById("i"+k[0].toUpperCase()+k.slice(1)).classList.toggle("on",k===f));renderInv();}
 let SRC_DIAG="Chưa kết nối.";
-function setSrc(live){const c=document.getElementById("srcChip");c.classList.toggle("live",live);c.textContent=live?"● Dữ liệu trực tiếp":"● Dữ liệu demo (bấm xem lý do)";c.title=SRC_DIAG;c.style.cursor="pointer";c.onclick=()=>alert(SRC_DIAG);console.info("[PCES] "+SRC_DIAG);}
+function syncORD(){ORD=(PAGE==="proj"&&USE_LIVE&&LIVE&&LIVE.length)?LIVE:DEMO_DATA;}
+function toggleSrc(){
+  if(PAGE!=="proj")return;
+  if(!LIVE||!LIVE.length){alert(SRC_DIAG);return;}
+  USE_LIVE=!USE_LIVE;refresh();
+}
+function updateChip(){
+  const c=document.getElementById("srcChip");if(!c)return;
+  const onProj=PAGE==="proj",liveActive=onProj&&USE_LIVE&&LIVE&&LIVE.length;
+  c.classList.toggle("live",!!liveActive);
+  if(!onProj){c.textContent="● Demo (trang minh hoạ)";c.title="Trang Công nợ & Khách hàng dùng dữ liệu demo.";c.style.cursor="default";c.onclick=null;return;}
+  c.style.cursor="pointer";
+  if(LIVE&&LIVE.length){c.textContent=USE_LIVE?"● Dữ liệu trực tiếp · bấm để xem demo":"● Dữ liệu demo · bấm để xem trực tiếp";c.title=SRC_DIAG+"\n(Bấm để chuyển Trực tiếp ↔ Demo)";c.onclick=toggleSrc;}
+  else{c.textContent="● Dữ liệu demo (bấm xem lý do)";c.title=SRC_DIAG;c.onclick=()=>alert(SRC_DIAG);}
+  console.info("[PCES] "+SRC_DIAG);
+}
+function refresh(){syncORD();buildFilter();updateRange();updateChip();render();}
 function showPage(p){PAGE=p;
   ["proj","debt","cust"].forEach(x=>document.getElementById("page-"+x).classList.toggle("on",x===p));
   document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("on",b.dataset.page===p));
   document.getElementById("ttl").textContent=p==="proj"?"Đơn hàng":p==="debt"?"Công nợ":"Khách hàng";
-  render();
+  refresh();
 }
 let CH={};
 function kill(k){if(CH[k]){try{CH[k].destroy();}catch(e){}delete CH[k];}}
@@ -704,6 +721,7 @@ function render(){
   else{renderKpiCust();renderCustMonth();renderRev();renderSeg();renderCustTable();}
 }
 async function load(){
+  DEMO_DATA=DEMO();
   try{
     const res=await fetch(SOURCE_URL,{redirect:"follow"});
     const txt=await res.text();
@@ -711,20 +729,20 @@ async function load(){
       SRC_DIAG="URL trả về trang HTML/đăng nhập (không phải JSON), status="+res.status+".\n→ Vào Apps Script → Deploy → sửa: Who has access = ANYONE (không cần đăng nhập).";throw 0;}
     let j;try{j=JSON.parse(txt);}catch(_){SRC_DIAG="Phản hồi không phải JSON hợp lệ (status="+res.status+"). 200 ký tự đầu đã in ra Console.";console.warn("[PCES] raw:",txt.slice(0,300));throw 0;}
     const arr=j.data||j;const cnt=Array.isArray(arr)?arr.length:0;
-    if(!cnt){SRC_DIAG="Kết nối OK nhưng Sheet nguồn chưa có dữ liệu (count="+(j.count!=null?j.count:0)+").\n→ Sheet 'Service Tickets' và các sheet con mới chỉ có header, chưa có dòng phiếu nào. Cần có dữ liệu thật từ Service.";throw 0;}
+    if(!cnt){SRC_DIAG="Kết nối OK nhưng Sheet nguồn chưa có dữ liệu (count="+(j.count!=null?j.count:0)+").";throw 0;}
     const mapped=mapLive(arr);
     const real=mapped.filter(o=>o.code&&o.code!=="(không rõ)"&&(o.customer&&o.customer!=="(chưa rõ KH)"||o.link||o.value>0));
-    if(!mapped.length){SRC_DIAG="Đọc được "+cnt+" dòng nhưng không gom được đơn nào.\n→ Tên cột trong Sheet không khớp map (kiểm tra header: Tên dự án, Danh sách khách hàng…).";throw 0;}
-    if(!real.length){SRC_DIAG="Kết nối OK, đọc "+cnt+" dòng nhưng các cột then chốt (ID / Tên dự án / Danh sách khách hàng / Trạng thái) đang TRỐNG.\n→ Các sheet con chỉ chứa dữ liệu file của KHỐI; sheet tổng hợp 'Service Tickets' chưa có dữ liệu phiếu. Cần đổ dữ liệu phiếu vào sheet 'Service Tickets'.";throw 0;}
-    ORD=mapped;SRC_DIAG="Đã kết nối trực tiếp: "+real.length+" đơn từ "+cnt+" dòng dữ liệu.";setSrc(true);
+    if(!mapped.length){SRC_DIAG="Đọc được "+cnt+" dòng nhưng không gom được đơn nào (tên cột không khớp).";throw 0;}
+    if(!real.length){SRC_DIAG="Đọc được "+cnt+" dòng nhưng các cột then chốt (ID / Tên dự án / khách hàng / Trạng thái) đang trống.\n→ Cần đổ dữ liệu phiếu vào sheet 'Service Tickets'.";throw 0;}
+    LIVE=mapped;USE_LIVE=true;SRC_DIAG="Đã kết nối trực tiếp: "+real.length+" đơn từ "+cnt+" dòng dữ liệu.";
   }catch(e){
     if(e&&e.message){
       const fetchErr=/fetch|network|load failed|cors/i.test(e.message);
-      SRC_DIAG=(fetchErr?"Không gọi được URL (CORS hoặc mạng): ":"Lỗi xử lý dữ liệu khi đọc Sheet: ")+e.message+(fetchErr?".\n→ Thử mở thẳng URL /exec trên trình duyệt.":".\n→ Dữ liệu tải về OK nhưng có ô sai kiểu; đã xử lý ép kiểu — nếu còn báo lỗi, gửi mình 1 dòng JSON mẫu.");
+      SRC_DIAG=(fetchErr?"Không gọi được URL (CORS hoặc mạng): ":"Lỗi xử lý dữ liệu khi đọc Sheet: ")+e.message+(fetchErr?".\n→ Thử mở thẳng URL /exec trên trình duyệt.":".");
     }
-    ORD=DEMO();setSrc(false);
+    LIVE=null;USE_LIVE=false;
   }
-  buildFilter();updateRange();render();
+  refresh();
 }
 if(typeof Chart!=="undefined"){Chart.defaults.font.family="Inter,-apple-system,sans-serif";Chart.defaults.font.size=11;Chart.defaults.color="#8295A8";}
 load();
