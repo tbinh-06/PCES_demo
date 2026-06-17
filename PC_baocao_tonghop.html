@@ -272,7 +272,7 @@ const C={
   proc:["Dịch vụ"],project:["Tên dự án","Dự án"],customer:["Danh sách khách hàng theo dõi dự án","Tên khách hàng"],name:["Tên"],
   total:["Tổng","Tổng tiền(USD)"],qty:["SL"],id:["ID"],stageId:["ID khối của phiếu"],created:["Tạo lúc"],
   reqDel:["Ngày giao hàng","Ngày khách yêu cầu giao hàng"],ship:["Hình thức sản xuất","Loại shipment"],status:["Trạng thái"],
-  block:["Tên khối"],assignee:["Người thực hiện"],po:["Đơn đặt hàng PO"],supplier:["Nhà cung cấp"],
+  block:["Tên khối"],blockCreated:["Tạo khối lúc"],assignee:["Người thực hiện"],po:["Đơn đặt hàng PO"],supplier:["Nhà cung cấp"],
   deposit:["Cọc sau kí hợp đồng"],payOnShip:["Thanh toán khi có thông báo giao hàng"],payAfter:["Thanh toán sau giao hàng"],payDue:["Thời hạn thanh toán sau giao hàng"]
 };
 function pick(r,names){for(const n of names){const v=r[n];if(v!=null&&String(v).trim()!=="")return v;}return "";}
@@ -283,7 +283,7 @@ function toDate(v){if(!v)return null;if(v instanceof Date)return isNaN(v)?null:v
   let m=s.match(/^(\d{1,2}):(\d{2})\s+(\d{1,2})\/(\d{1,2})\/(\d{4})$/);if(m)return new Date(+m[5],+m[4]-1,+m[3],+m[1],+m[2]);
   m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);if(m)return new Date(+m[3],+m[2]-1,+m[1]);const d=new Date(s);return isNaN(d)?null:d;}
 function stageOf(proc,block){const p=String(proc==null?"":proc).toLowerCase(),b=String(block==null?"":block).toLowerCase();
-  if(/hoàn tất|nghiệm thu|đóng đơn|hoàn thiện đơn/.test(b))return 7;
+  if(/hoàn thành|hoàn tất|nghiệm thu|đóng đơn|hoàn thiện|đã giao|giao xong|kết thúc/.test(b))return 7;
   if(/giao hàng|bàn giao|shipment|vận chuyển|delivery/.test(b))return 6;
   if(/qc|kiểm tra|\btest|coating|aoi|đóng gói|packing/.test(b))return 5;
   if(/smt|assembly|sản xuất|gia công|\blò\b|chì|mechanical|sau sx|sau smt/.test(b))return 4;
@@ -310,12 +310,14 @@ function mapLive(arr){
     const rd=toDate(pick(r,C.reqDel));if(rd)o.reqDelivery=rd;
     const ship=pick(r,C.ship);if(ship)o.shipment=ship;
     const st=stageOf(proc,block);if(st>=o.stage){o.stage=st;o.stageStatus=status;}
+    if(st===7){const bt=toDate(pick(r,C.blockCreated))||cr;if(bt&&(!o.actualDelivery||+bt>+o.actualDelivery))o.actualDelivery=bt;}
     if(!o.link)o.link=link;
     o.procs.push({proc:String(proc||block||"(quy trình)"),block:String(block||""),status:String(status||""),assignee:pick(r,C.assignee)||"",created:cr,doneAt:/hoàn thành|done|xong|đã giao/i.test(String(status))?cr:null,link});
   });
   const doneRe=/hoàn thành|hoàn tất|done|xong|đã giao|completed/i;
   return Object.values(byProj).map(o=>{if(!o.customer)o.customer="(chưa rõ KH)";
-    o.delivered=(o.stage>=6&&doneRe.test(o.stageStatus))||o.stage===7;if(o.delivered&&o.reqDelivery)o.onTime=true;
+    o.delivered=(o.stage>=6&&doneRe.test(o.stageStatus))||o.stage===7;
+    if(o.delivered)o.onTime=(o.actualDelivery&&o.reqDelivery)?(+o.actualDelivery<=+o.reqDelivery):true;
     o.poTotal=sum(o.pos,p=>p.value);return o;});
 }
 
