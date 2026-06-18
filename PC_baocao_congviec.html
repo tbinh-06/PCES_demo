@@ -364,6 +364,7 @@ function kpiHtml(list){
   const total=list.length;
   const done=list.filter(t=>t.done).length;
   const over=list.filter(t=>isOverdue(t)).length;
+  const doneLate=list.filter(t=>t.done&&t.doneAt&&t.deadline&&+t.doneAt>+t.deadline).length;
   const prog=total-done-over;
   const orders={};list.forEach(t=>{if(t.proj)orders[t.proj]=t.projValue||0;});
   const ordVal=sum(Object.values(orders),v=>v),nOrd=Object.keys(orders).length;
@@ -374,7 +375,10 @@ function kpiHtml(list){
   return k("Tổng task (theo kỳ)",total,"t",r("Số đơn hàng",nOrd))+
     k("Đã hoàn thành",done,"g",bar(pctN(done),"var(--green)"))+
     k("Đang triển khai",prog,"b",bar(pctN(prog),"var(--blue)"))+
-    k("Trễ hạn",over,over?"r":"g",bar(pctN(over),over?"var(--red)":"var(--green)"))+
+    k("Trễ hạn",over+doneLate,(over+doneLate)?"r":"g",
+      r("Đang làm &amp; đã quá hạn",`<b style="color:var(--red)">${over}</b>`)+
+      r("Đã hoàn thành nhưng trễ",`<b style="color:var(--amber)">${doneLate}</b>`)+
+      `<div class="kbar"><i style="width:${Math.min(100,pctN(over+doneLate))}%;background:${(over+doneLate)?'var(--red)':'var(--green)'}"></i></div>`)+
     k("Tổng giá trị đơn hàng",usd(ordVal),"a",r("đơn hàng trong kỳ",nOrd));
 }
 
@@ -423,8 +427,8 @@ function empHeat(list,prefix){
   if(!rows.length){document.getElementById(prefix+"H").innerHTML="";document.getElementById(prefix+"B").innerHTML=`<tr><td class="muted">Không có dữ liệu.</td></tr>`;return;}
   const mxS=ths.map((_,i)=>Math.max(1,...rows.map(r=>r.st.soon[i]))),mxO=ths.map((_,i)=>Math.max(1,...rows.map(r=>r.st.over[i])));
   document.getElementById(prefix+"H").innerHTML=
-    `<tr><th rowspan="2" style="width:20%">Nhân viên</th><th rowspan="2" style="width:16%;text-align:left">Phòng</th><th rowspan="2">Tổng</th>`+
-    `<th colspan="3" style="color:var(--blue)">Sắp tới hạn (còn ≤)</th><th colspan="3" style="color:var(--red)">Quá hạn (đã trễ &gt;)</th></tr>`+
+    `<tr><th rowspan="2" style="width:20%">Nhân viên</th><th rowspan="2" style="width:14%;text-align:left">Phòng</th><th rowspan="2" style="width:9%">Tổng</th>`+
+    `<th colspan="3" style="width:28.5%;color:var(--blue)">Sắp tới hạn (còn ≤)</th><th colspan="3" style="width:28.5%;color:var(--red)">Quá hạn (đã trễ &gt;)</th></tr>`+
     `<tr>${lb.map(l=>`<th>${l}</th>`).join("")}${lb.map(l=>`<th>${l}</th>`).join("")}</tr>`;
   const heat=(arr,mx,cols)=>arr.map((v,i)=>`<td><div class="hcell" style="background:${v?hexA(cols[i],0.16+0.58*(v/mx[i])):'transparent'};color:${(v/mx[i])>0.58?'#fff':'var(--tx)'}">${v||'–'}</div></td>`).join("");
   const plain=arr=>arr.map(v=>`<td><div class="hcell" style="background:var(--bg2)">${v||'–'}</div></td>`).join("");
@@ -554,7 +558,7 @@ function togWl(k){wlExp.has(k)?wlExp.delete(k):wlExp.add(k);workload(scope());}
 function workload(list){
   let from=F.from?new Date(F.from):null,to=F.to?new Date(F.to):null;
   const today=new Date();today.setHours(0,0,0,0);
-  if(!from)from=new Date(+today-1*DAY);if(!to)to=new Date(+today+12*DAY);
+  if(!from)from=new Date(+today);if(!to)to=new Date(+today+13*DAY);
   from=new Date(from);from.setHours(0,0,0,0);to=new Date(to);to.setHours(0,0,0,0);
   const days=[];for(let d=new Date(from);+d<=+to&&days.length<28;d.setDate(d.getDate()+1))days.push(new Date(d));
   const dk=d=>{if(!d)return -1;const x=new Date(d);x.setHours(0,0,0,0);return +x;};
@@ -562,22 +566,30 @@ function workload(list){
   const idEmps=(F.dept!=="all"?EMP.filter(e=>e.dept===F.dept):EMP).filter(e=>list.some(t=>t.empId===e.id)).map(e=>({key:e.id,name:e.name,dept:e.dept,m:t=>t.empId===e.id}));
   const liveNames=[...new Set(list.filter(t=>!t.empId).map(t=>t.empName))].map(n=>({key:"n:"+n,name:n,dept:"",m:t=>!t.empId&&t.empName===n}));
   const emps=idEmps.concat(liveNames);
-  const dailyOf=ts=>days.map(d=>sum(ts.filter(t=>dk(t.deadline)===dk(d)),t=>t.slaH||0));
-  const rows=emps.map(e=>{const ts=list.filter(e.m);const daily=dailyOf(ts);return {e,ts,daily,total:sum(daily,h=>h)};}).filter(r=>r.total>0).sort((a,b)=>b.total-a.total);
+  function scheduleEmp(ts){
+    const dayLoad=days.map(()=>0),alloc=new Map();
+    let startIdx=days.findIndex(d=>dk(d)===todk);if(startIdx<0)startIdx=0;
+    ts.filter(t=>!t.done&&(t.slaH||0)>0).sort((a,b)=>dk(a.deadline)-dk(b.deadline)).forEach(t=>{
+      const arr=days.map(()=>0);alloc.set(t,arr);let rem=t.slaH;
+      for(let i=startIdx;i<days.length&&rem>0;i++){const room=Math.max(0,CAP-dayLoad[i]),put=Math.min(room,rem);arr[i]+=put;dayLoad[i]+=put;rem-=put;}
+    });
+    return {daily:dayLoad,alloc};
+  }
+  const rows=emps.map(e=>{const ts=list.filter(e.m);const sch=scheduleEmp(ts);const real=sum(ts.filter(t=>!t.done),t=>t.slaH||0);return {e,ts,daily:sch.daily,alloc:sch.alloc,total:real};}).filter(r=>r.total>0).sort((a,b)=>b.total-a.total);
   const dayTh=days.map(d=>`<th class="day ${dk(d)===todk?'today':''}">${d.toLocaleDateString("vi-VN",{day:"2-digit"})}</th>`).join("");
   const stat=(tot,cap)=>{const p=Math.round(pv(tot,cap));return p>100?{p,s:"Quá tải",c:"bR"}:p>=80?{p,s:"Cao",c:"bM"}:{p,s:"Ổn",c:"bG"};};
   const cell=(h,cap,isT,color)=>{if(!h)return `<td class="day${isT?' today':''}"></td>`;
     const over=h>cap,ratio=Math.min(1,h/cap),bg=over?'#D24A43':hexA(color||'#1768B0',.28+.55*ratio),txt=(over||ratio>.55)?'#fff':'var(--tx)';
     return `<td class="day${isT?' today':''}"><div class="wcell" style="background:${bg};color:${txt}">${Math.round(h)}</div></td>`;};
   if(!rows.length){document.getElementById("wlWrap").innerHTML=`<div class="muted">Không có dữ liệu workload trong khoảng.</div>`;return;}
-  const gAll=list.filter(t=>emps.some(e=>e.m(t))),gdaily=dailyOf(gAll),gtot=sum(gdaily,h=>h),gcapDay=Math.max(1,emps.length)*CAP,gs=stat(gtot,gcapDay*nDays);
+  const gdaily=days.map((d,i)=>sum(rows,r=>r.daily[i]||0)),gtot=sum(rows,r=>r.total),gcapDay=Math.max(1,rows.length)*CAP,gs=stat(gtot,gcapDay*nDays);
   let h=`<table class="pg wl"><thead><tr><th class="l">Nhân viên / Đơn hàng</th><th>Giờ SLA</th><th>Năng lực</th><th>% tải</th><th>Trạng thái</th>${dayTh}</tr></thead><tbody>`;
   h+=`<tr class="wtot"><td class="l">TỔNG (${rows.length} người)</td><td class="val">${fmtH(gtot)}</td><td class="val s2">${fmtH(gcapDay*nDays)}</td><td class="val">${gs.p}%</td><td><span class="tg ${gs.c}">${gs.s}</span></td>${gdaily.map((hh,i)=>cell(hh,gcapDay,dk(days[i])===todk)).join("")}</tr>`;
   rows.forEach(r=>{const open=wlExp.has(r.e.key),cap=nDays*CAP,s=stat(r.total,cap);
     h+=`<tr class="wp" onclick="togWl('${r.e.key.replace(/'/g,"\\'")}')"><td class="l"><span class="caret">${open?'▾':'▸'}</span>${esc(r.e.name)}${r.e.dept?` <span class="s2">${esc(r.e.dept)}</span>`:''}</td><td class="val">${fmtH(r.total)}</td><td class="val s2">${fmtH(cap)}</td><td class="val">${s.p}%</td><td><span class="tg ${s.c}">${s.s}</span></td>${r.daily.map((hh,i)=>cell(hh,CAP,dk(days[i])===todk)).join("")}</tr>`;
     if(open){
       const byOrd={};r.ts.forEach(t=>{(byOrd[t.proj]||(byOrd[t.proj]=[])).push(t);});
-      const ords=Object.entries(byOrd).map(([p,ts])=>({p,daily:dailyOf(ts),total:sum(dailyOf(ts),x=>x)})).sort((a,b)=>b.total-a.total);
+      const ords=Object.entries(byOrd).map(([p,ts])=>{const daily=days.map((d,i)=>sum(ts,t=>(r.alloc.get(t)||[])[i]||0));return {p,daily,total:sum(daily,x=>x)};}).sort((a,b)=>b.total-a.total);
       const maxC=Math.max(1,...ords.flatMap(o=>o.daily));
       ords.forEach(o=>{
         h+=`<tr class="wc"><td class="l" style="padding-left:28px">${esc(o.p)}</td><td class="val s2">${fmtH(o.total)}</td><td></td><td></td><td></td>${o.daily.map((hh,i)=>{const isT=dk(days[i])===todk;if(!hh)return `<td class="day${isT?' today':''}"></td>`;const r2=Math.min(1,hh/maxC);return `<td class="day${isT?' today':''}"><div class="wcell" style="background:${hexA('#5BA3D8',.3+.5*r2)};color:${r2>.62?'#fff':'var(--tx)'}">${Math.round(hh)}</div></td>`;}).join("")}</tr>`;
