@@ -408,17 +408,17 @@ function renderCustBar(){
   const done=list.map(o=>o.value*(o.stage/7));
   const remOk=list.map(o=>(!o.delivered&&!isLate(o))?o.value*(1-o.stage/7):0);
   const remLate=list.map(o=>isLate(o)?o.value*(1-o.stage/7):0);
-  const box=document.getElementById("custBarBox");if(box)box.style.height=Math.max(300,list.length*50+30)+"px";
+  const box=document.getElementById("custBarBox");if(box)box.style.height=Math.max(280,list.length*44+24)+"px";
   kill("custBar");CH.custBar=new Chart(document.getElementById("c_custBar"),{type:"bar",
     data:{labels:list.map(o=>o.code+" · "+o.customer),datasets:[
-      {label:"Đã hoàn thành",data:done,backgroundColor:"#57A07A",stack:"v",borderRadius:3,barPercentage:.82,categoryPercentage:.86},
-      {label:"Đang tiến hành",data:remOk,backgroundColor:"#4781BD",stack:"v",borderRadius:3,barPercentage:.82,categoryPercentage:.86},
-      {label:"Trễ hạn",data:remLate,backgroundColor:"#CB6A62",stack:"v",borderRadius:3,barPercentage:.82,categoryPercentage:.86}]},
-    options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{filter:it=>it.parsed.x>0,callbacks:{
+      {label:"Đã hoàn thành",data:done,backgroundColor:"#57A07A",stack:"v",borderRadius:3,barPercentage:.7,categoryPercentage:.82},
+      {label:"Đang tiến hành",data:remOk,backgroundColor:"#4781BD",stack:"v",borderRadius:3,barPercentage:.7,categoryPercentage:.82},
+      {label:"Trễ hạn",data:remLate,backgroundColor:"#CB6A62",stack:"v",borderRadius:3,barPercentage:.7,categoryPercentage:.82}]},
+    options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,layout:{padding:{right:6,left:0}},plugins:{legend:{display:false},tooltip:{filter:it=>it.parsed.x>0,callbacks:{
       title:items=>list[items[0].dataIndex].code,
       label:c=>c.dataset.label+": "+usd(c.parsed.x),
       afterBody:items=>{const o=list[items[0].dataIndex];return esc(o.customer)+" · Tổng "+usd(o.value)+" · Hoàn thành "+Math.round(o.stage/7*100)+"%";}}}},
-      scales:{x:{position:"top",stacked:true,grid:{color:grid},ticks:{callback:v=>usdK(v)}},y:{stacked:true,grid:{display:false},ticks:{font:{size:10},autoSkip:false}}}}});
+      scales:{x:{position:"top",stacked:true,min:0,max:Math.max(1,...list.map(o=>o.value)),grace:0,grid:{color:grid},ticks:{callback:v=>usdK(v)}},y:{stacked:true,grid:{display:false},ticks:{font:{size:10},autoSkip:false,crossAlign:"far",padding:6}}}}});
 }
 function renderPipe(){
   const list=ordList(),cnt=STG.map(()=>0),val=STG.map(()=>0),lateCnt=STG.map(()=>0),lateVal=STG.map(()=>0);
